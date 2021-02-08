@@ -55,8 +55,23 @@ can be chosen by command-line flag:
 Note that the data type chosen will restrict the available operators, functions, and constants. For example, trigonometric operations
 are not available on integers, and bit-shifting operations are not available on floats.
 
-### Prefix Operators
+### Order of Operations
 
+The following order of operations is used to resolve expressions:
+
+- Parentheses (`(...)`)
+- Unary Prefix Operators (`-` `!`)
+- Bitwise operations (`&` `|` `^`)
+- Shifts (`<<` `>>`)
+- Exponentiation (`**`)
+- Multiplication and Division (`*` `/` `//` `%`)
+- Addition and Subtraction (`+` `-`)
+
+Operations at the same level of precedence are resolved from left to right.
+
+### Unary Prefix Operators
+
+- `-`: Negation
 - `!`: Bitwise Not
 
 ### Infix Operators
@@ -100,6 +115,8 @@ are not available on integers, and bit-shifting operations are not available on 
 - `lg`: Base-2 Logarithm
 - `ln`: Natural (Base-e) Logarithm
 - `exp`: `e**x`
+
+Trigonometric functions operate on radians.
 
 ### Constants
 
