@@ -87,7 +87,7 @@ Operations at the same level of precedence are resolved from left to right.
 - `>>`: Right Shift
 - `&`: Bitwise And
 - `|`: Bitwise Or
-- `^`: Bitwise xor
+- `^`: Bitwise Xor
 
 ### Functions
 

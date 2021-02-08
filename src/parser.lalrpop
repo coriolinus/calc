@@ -1,0 +1,21 @@
+use std::str::FromStr;
+use crate::ast::{
+    Constant,
+    Expr,
+    Function,
+    HistoryIndexKind,
+    InfixOperator,
+    PrefixOperator,
+    Term,
+};
+
+grammar;
+
+pub Term: Term<N> = {
+    <s:r"[0-9]+(\.[0-9]+)?"> => Term::Literal(T::from_str(s)),
+    "e" => Term::Constant(Constant::E),
+    "pi" => Term::Constant(Constant::Pi),
+    "π" => Term::Constant(Constant::Pi),
+    "@{" <n:r"[0-9]+"> "}" => Term::History(HistoryIndexKind::Relative, n.parse()),
+    "@[" <n:r"[0-9]+"> "]" => Term::History(HistoryIndexKind::Absolute, n.parse()),
+};
