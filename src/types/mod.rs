@@ -4,6 +4,7 @@ use std::{
 };
 
 mod f64;
+mod i64;
 mod u64;
 
 #[derive(Debug, thiserror::Error)]
