@@ -106,6 +106,7 @@ version = "0.1.0"
 dependencies = [
  "lalrpop",
  "lalrpop-util",
+ "lazy_static",
  "regex",
  "structopt",
  "thiserror",

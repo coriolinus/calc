@@ -1,5 +1,6 @@
 pub mod ast;
 pub mod types;
+pub mod render;
 
 #[derive(Default)]
 pub struct Context<N> {

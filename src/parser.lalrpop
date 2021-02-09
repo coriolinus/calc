@@ -1,6 +1,7 @@
 use crate::ast::{
     Constant,
     Expr,
+    FormattedExpr,
     Function,
     HistoryIndexKind,
     InfixOperator,
@@ -11,6 +12,13 @@ use crate::ast::{
 use lalrpop_util::ParseError;
 
 grammar;
+
+match {
+    r"[_0-9]+(\.[_0-9]+)?",
+} else {
+    r"\d*[bodx]?[n_,s]?\d*",
+    _,
+}
 
 FuncName: Function = {
     "abs" => Function::Abs,
@@ -120,4 +128,12 @@ ExprTerm: Expr<'input> = {
     "(" <Expr> ")" => Expr::Group(Box::new(<>)),
     "⌈" <Expr> "⌉" => Expr::Func(Function::Ceil, Box::new(<>)),
     "⌊" <Expr> "⌋" => Expr::Func(Function::Floor, Box::new(<>)),
+};
+
+pub FormattedExpr: FormattedExpr<'input> = {
+    <expr:Expr> ":" <output_format:r"\d*[bodx]?[n_,s]?\d*"> =>? Ok(FormattedExpr {
+        expr,
+        output_format: output_format.parse().map_err(|_| ParseError::User { error: "failed to parse output format" })?,
+     }),
+    <expr:Expr> => FormattedExpr { expr, output_format: Default::default() },
 };

@@ -1,4 +1,5 @@
 use lalrpop_util::lalrpop_mod;
+use crate::render::OutputFormat;
 
 lalrpop_mod!(pub parser);
 
@@ -80,10 +81,17 @@ pub enum Term<'input> {
 }
 
 /// An expression or subexpression
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Expr<'input> {
     Term(Term<'input>),
     Prefix(PrefixOperator, Box<Expr<'input>>),
     Infix(Box<Expr<'input>>, InfixOperator, Box<Expr<'input>>),
     Func(Function, Box<Expr<'input>>),
     Group(Box<Expr<'input>>),
+}
+
+/// An expression with an output format
+pub struct FormattedExpr<'input> {
+    pub expr: Expr<'input>,
+    pub output_format: OutputFormat,
 }
