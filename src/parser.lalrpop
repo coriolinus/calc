@@ -114,4 +114,6 @@ ExprTerm: Expr<'input> = {
     <Term> => Expr::Term(<>),
     <f:FuncName> "(" <e:Expr> ")" => Expr::Func(f, Box::new(e)),
     "(" <Expr> ")" => Expr::Group(Box::new(<>)),
+    "⌈" <Expr> "⌉" => Expr::Func(Function::Ceil, Box::new(<>)),
+    "⌊" <Expr> "⌋" => Expr::Func(Function::Floor, Box::new(<>)),
 };
