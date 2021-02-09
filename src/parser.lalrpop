@@ -8,6 +8,8 @@ use crate::ast::{
     Term,
 };
 
+use lalrpop_util::ParseError;
+
 grammar;
 
 FuncName: Function = {
@@ -47,8 +49,14 @@ Term: Term<'input> = {
     r"[0-9]+(\.[0-9]+)?" => Term::Literal(<>),
     r"\.[0-9]+" => Term::Literal(<>),
     <Constant> => Term::Constant(<>),
-    <h:r"@\[([0-9]+)\]"> => Term::History(HistoryIndexKind::Absolute, h[2..h.len()-1].parse().unwrap()),
-    <h:r"@\{([0-9]+)\}"> => Term::History(HistoryIndexKind::Relative, h[2..h.len()-1].parse().unwrap()),
+    <h:r"@\[([0-9]+)\]"> =>? Ok(Term::History(
+        HistoryIndexKind::Absolute,
+        h[2..h.len()-1].parse().map_err(|_| ParseError::User { error: "index must fit into usize" })?
+    )),
+    <h:r"@\{([0-9]+)\}"> =>? Ok(Term::History(
+        HistoryIndexKind::Relative,
+        h[2..h.len()-1].parse().map_err(|_| ParseError::User { error: "index must fit into usize" })?
+    )),
     <h:r"@+"> => Term::History(HistoryIndexKind::Relative, <>.len()),
 };
 
