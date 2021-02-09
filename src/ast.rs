@@ -13,11 +13,11 @@ pub enum PrefixOperator {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum InfixOperator {
     Add,
-    Subtract,
-    Multiply,
-    Divide,
-    TruncateDivide,
-    Exponentiate,
+    Sub,
+    Mul,
+    Div,
+    TruncDiv,
+    Exp,
     Rem,
     Lshift,
     Rshift,
@@ -80,6 +80,7 @@ pub enum Term<'input> {
 pub enum Expr<'input> {
     Term(Term<'input>),
     Prefix(PrefixOperator, Box<Expr<'input>>),
-    Infix(Box<Expr<'input>>, InfixOperator, Term<'input>),
-    Parenthesized(Box<Expr<'input>>),
+    Infix(Box<Expr<'input>>, InfixOperator, Box<Expr<'input>>),
+    Func(Function, Box<Expr<'input>>),
+    Group(Box<Expr<'input>>),
 }

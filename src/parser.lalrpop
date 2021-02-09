@@ -10,13 +10,100 @@ use crate::ast::{
 
 grammar;
 
-pub Term: Term<'input> = {
+FuncName: Function = {
+    "abs" => Function::Abs,
+    "ceil" => Function::Ceil,
+    "floor" => Function::Floor,
+    "round" => Function::Round,
+    "sin" => Function::Sin,
+    "cos" => Function::Cos,
+    "tan" => Function::Tan,
+    "sinh" => Function::Sinh,
+    "cosh" => Function::Cosh,
+    "tanh" => Function::Tanh,
+    "asin" => Function::Asin,
+    "acos" => Function::Acos,
+    "atan" => Function::Atan,
+    "asinh" => Function::Asinh,
+    "acosh" => Function::Acosh,
+    "atanh" => Function::Atanh,
+    "rad" => Function::Rad,
+    "dec" => Function::Dec,
+    "sqrt" => Function::Sqrt,
+    "cbrt" => Function::Cbrt,
+    "log" => Function::Log,
+    "lg" => Function::Lg,
+    "ln" => Function::Ln,
+    "exp" => Function::Exp,
+};
+
+Constant: Constant = {
+    "e" => Constant::E,
+    "pi" => Constant::Pi,
+    "π" => Constant::Pi,
+};
+
+Term: Term<'input> = {
     r"[0-9]+(\.[0-9]+)?" => Term::Literal(<>),
     r"\.[0-9]+" => Term::Literal(<>),
-    "e" => Term::Constant(Constant::E),
-    "pi" => Term::Constant(Constant::Pi),
-    "π" => Term::Constant(Constant::Pi),
+    <Constant> => Term::Constant(<>),
     <h:r"@\[([0-9]+)\]"> => Term::History(HistoryIndexKind::Absolute, h[2..h.len()-1].parse().unwrap()),
     <h:r"@\{([0-9]+)\}"> => Term::History(HistoryIndexKind::Relative, h[2..h.len()-1].parse().unwrap()),
     <h:r"@+"> => Term::History(HistoryIndexKind::Relative, <>.len()),
+};
+
+// Expressions need to evolve from low precedence to high.
+// This ensures that when we recursively evaluate them, we end up with the correct results.
+//
+// This parses the lowest level of precedence: addition and subtraction.
+pub Expr: Expr<'input> = {
+    <l:Expr> "+" <r:Factor> => Expr::Infix(Box::new(l), InfixOperator::Add, Box::new(r)),
+    <l:Expr> "-" <r:Factor> => Expr::Infix(Box::new(l), InfixOperator::Sub, Box::new(r)),
+    Factor,
+};
+
+// This parses the next level of precedence: multiplication and division.
+Factor: Expr<'input> = {
+    <l:Factor> "*" <r:Bitwise> => Expr::Infix(Box::new(l), InfixOperator::Mul, Box::new(r)), // asterisk
+    <l:Factor> "x" <r:Bitwise> => Expr::Infix(Box::new(l), InfixOperator::Mul, Box::new(r)), // lowercase x
+    <l:Factor> "×" <r:Bitwise> => Expr::Infix(Box::new(l), InfixOperator::Mul, Box::new(r)), // u+00d7 multiplication sign
+    <l:Factor> "·" <r:Bitwise> => Expr::Infix(Box::new(l), InfixOperator::Mul, Box::new(r)), // u+00b7 middle dot
+    <l:Factor> "⋅" <r:Bitwise> => Expr::Infix(Box::new(l), InfixOperator::Mul, Box::new(r)), // u+22c5 dot operator
+    <l:Factor> "✕" <r:Bitwise> => Expr::Infix(Box::new(l), InfixOperator::Mul, Box::new(r)), // u+2715 multiplication x
+    <l:Factor> "✖" <r:Bitwise> => Expr::Infix(Box::new(l), InfixOperator::Mul, Box::new(r)), // u+2716 heavy multiplication x
+    <l:Factor> "/" <r:Bitwise> => Expr::Infix(Box::new(l), InfixOperator::Div, Box::new(r)), // slash
+    <l:Factor> "÷" <r:Bitwise> => Expr::Infix(Box::new(l), InfixOperator::Div, Box::new(r)), // u+00f7 division sign
+    <l:Factor> "%" <r:Bitwise> => Expr::Infix(Box::new(l), InfixOperator::Rem, Box::new(r)),
+    <l:Factor> "//" <r:Bitwise> => Expr::Infix(Box::new(l), InfixOperator::TruncDiv, Box::new(r)),
+    Bitwise,
+};
+
+// This parses the next level of precedence: bitwise operations
+Bitwise: Expr<'input> = {
+    <l:Bitwise> "&" <r:ShiftExp> => Expr::Infix(Box::new(l), InfixOperator::BitAnd, Box::new(r)),
+    <l:Bitwise> "|" <r:ShiftExp> => Expr::Infix(Box::new(l), InfixOperator::BitOr, Box::new(r)),
+    <l:Bitwise> "^" <r:ShiftExp> => Expr::Infix(Box::new(l), InfixOperator::BitXor, Box::new(r)),
+    ShiftExp,
+};
+
+// This parses the next level of precedence: bit shifts and exponentiaton
+ShiftExp: Expr<'input> = {
+    <l:ShiftExp> "<<" <r:Unary> => Expr::Infix(Box::new(l), InfixOperator::Lshift, Box::new(r)),
+    <l:ShiftExp> ">>" <r:Unary> => Expr::Infix(Box::new(l), InfixOperator::Rshift, Box::new(r)),
+    <l:ShiftExp> "**" <r:Unary> => Expr::Infix(Box::new(l), InfixOperator::Exp, Box::new(r)),
+    Unary,
+};
+
+// This parses the next level of precedence: unary operations
+Unary: Expr<'input> = {
+    "!" <r:Unary> => Expr::Prefix(PrefixOperator::Not, Box::new(r)),
+    "-" <r:Unary> => Expr::Prefix(PrefixOperator::Negation, Box::new(r)),
+    ExprTerm,
+};
+
+// This parses the final level of precedence: terms, functions, and parentheses
+ExprTerm: Expr<'input> = {
+    <Term> => Expr::Term(<>),
+    <f:FuncName> "(" <e:Expr> ")" => Expr::Func(f, Box::new(e)),
+    "(" <Expr> ")" => Expr::Group(Box::new(<>)),
 };

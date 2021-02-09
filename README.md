@@ -61,9 +61,8 @@ The following order of operations is used to resolve expressions:
 
 - Parentheses (`(...)`)
 - Unary Prefix Operators (`-` `!`)
+- Shifts and Exponentiation (`<<` `>>` `**`)
 - Bitwise operations (`&` `|` `^`)
-- Shifts (`<<` `>>`)
-- Exponentiation (`**`)
 - Multiplication and Division (`*` `/` `//` `%`)
 - Addition and Subtraction (`+` `-`)
 
