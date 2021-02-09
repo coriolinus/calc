@@ -24,9 +24,9 @@ When non-flag arguments are present, `calc` interprets them as an expression and
 $ calc
 [0]: 1+1
 2
-[1]: 3(5/(3-4))
+[1]: 3*(5/(3-4))
 -15
-[2]: 3pi^2
+[2]: 3xpi^2
 29.608813203268074
 [3]: @+1
 30.608813203268074
@@ -40,6 +40,10 @@ $
 
 In the absence of non-flag arguments, `calc` launches a simple shell which just evaluates each line of input.
 
+### Multiplication
+
+Implicit multiplication is not supported. Use a multiplication operator such as `*`.
+
 ## Reference
 
 ### Data Types
@@ -47,10 +51,13 @@ In the absence of non-flag arguments, `calc` launches a simple shell which just 
 Every invocation of `calc` interprets all arguments as a single data type. By default, `calc` uses `f64`, but other data types
 can be chosen by command-line flag:
 
-- `f64` (default): floating point operations
-- `u64`: unsigned integer operations
-- `i64`: signed integer operations
+- `f64` (default): signed 64-bit floating point operations
+- `u64`: unsigned 64-bit integer operations
+- `i64`: signed 64-bit integer operations
 - `decimal N`: signed fixed-position decimal operations building on the [`bigdecimal` crate](https://crates.io/crates/bigdecimal)
+- `rat64`: signed 64-bit rational operations building on the [`num_rational` crate](https://crates.io/crates/num_rational)
+- `bigrat`: signed arbitrary-precision rational operations building on the [`num_rational` crate](https://crates.io/crates/num_rational)
+- `bigint`: signed arbitrary-precision integer operations building on the [`num_bigint` crate](https://crates.io/crates/num_bigint)
 
 Note that the data type chosen will restrict the available operators, functions, and constants. For example, trigonometric operations
 are not available on integers, and bit-shifting operations are not available on floats.
