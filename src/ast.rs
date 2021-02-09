@@ -1,5 +1,4 @@
 use lalrpop_util::lalrpop_mod;
-use crate::render::OutputFormat;
 
 lalrpop_mod!(pub parser);
 
@@ -22,6 +21,8 @@ pub enum InfixOperator {
     Rem,
     Lshift,
     Rshift,
+    WrappingLshift,
+    WrappingRshift,
     BitAnd,
     BitOr,
     BitXor,
@@ -88,10 +89,4 @@ pub enum Expr<'input> {
     Infix(Box<Expr<'input>>, InfixOperator, Box<Expr<'input>>),
     Func(Function, Box<Expr<'input>>),
     Group(Box<Expr<'input>>),
-}
-
-/// An expression with an output format
-pub struct FormattedExpr<'input> {
-    pub expr: Expr<'input>,
-    pub output_format: OutputFormat,
 }

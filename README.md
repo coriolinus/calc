@@ -40,7 +40,7 @@ $
 
 In the absence of non-flag arguments, `calc` launches a simple shell which just evaluates each line of input.
 
-### Multiplication
+### No Implicit Multiplication
 
 Implicit multiplication is not supported. Use a multiplication operator such as `*`.
 
@@ -82,61 +82,13 @@ Numbers may contain `_` characters at any point. Those symbols are ignored; they
 
 It is legal to intermix inputs of varying bases.
 
-### Numeric Output Format
-
-The output format of an expression can be specified by adding a `:` symbol followed by a format
-specifier to the expression.
-
-A format separator consists of several parts, each of which is optional.
-
-- `0`: if present and a width is specified, pads to that width with `0` chars. If not specified, pads with spaces.
-- Width: decimal numeric digits not beginning with `0`. attempt to line up the decimal point this many characters from the start of the output.
-- Base: one of `b`, `o`, `d`, `x`, for binary, octal, decimal, hexadecimal rational, respectively.
-
-  Default: decimal. The other options are only valid for integer data types.
-
-  Example:
-
-  ```text
-  % calc --u64
-  [0]: 0o644 | 1 :o
-  755
-  [1]: 0o755 & (!0 ^ 1) :o
-  644
-  ```
-
-- Separator: one of `_`, `,`, `s`. Separate the digits into groups with underscores, commas, and spaces respectively.
-
-  Default: no separation.
-- Group size: if a separator is specified, how many characters appear in the group.
-
-
-  Default: 3
-
-  Example:
-
-  ```text
-  [2]: 0b0101_1010 >> 1:08bs4
-  0010 1101
-  [3]: 0xff << 1:04x_2
-  01_fe
-  ```
-
-  Example with floating point numbers:
-
-  ```text
-  $ calc "123*45:,"
-  5,535
-  ```
-
-
 ### Order of Operations
 
 The following order of operations is used to resolve expressions:
 
 - Parentheses (`(...)`)
 - Unary Prefix Operators (`-` `!`)
-- Shifts and Exponentiation (`<<` `>>` `**`)
+- Shifts and Exponentiation (`<<` `>>` `<<<` `>>>` `**`)
 - Bitwise operations (`&` `|` `^`)
 - Multiplication and Division (`*` `/` `//` `%`)
 - Addition and Subtraction (`+` `-`)
@@ -159,6 +111,8 @@ Operations at the same level of precedence are resolved from left to right.
 - `%` : Arithmetic remainder
 - `<<`: Left Shift
 - `>>`: Right Shift
+- `<<<`: Wrapping Left Shift
+- `>>>`: Wrappping Right Shift
 - `&`: Bitwise And
 - `|`: Bitwise Or
 - `^`: Bitwise Xor
