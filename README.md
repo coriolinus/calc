@@ -62,6 +62,26 @@ can be chosen by command-line flag:
 Note that the data type chosen will restrict the available operators, functions, and constants. For example, trigonometric operations
 are not available on integers, and bit-shifting operations are not available on floats.
 
+### Numeric Input
+
+Numbers may contain `_` characters at any point. Those symbols are ignored; they are for user convenience and readability only.
+
+`calc` can handle inputs in several numeric bases.
+
+- Un-annotated numbers are assumed to be base 10. Example: `123.45`.
+
+  Note: this is the only format which is legal for non-integral numbers.
+
+- Numbers with a `0b` prefix are in base 2. Example: `0b0110_1010`.
+- Numbers with a `0o` prefix are in base 8. Example: `0o755`.
+
+  Note: a leading `0` is not in itself an octal prefix. Example: `0755` equals `0d755`.
+
+- Numbers with a `0d` prefix are in base 10. Example: `1234_5678`.
+- Numbers with a `0x` prefix are in base 16. Example: `0xdead_beef`.
+
+It is legal to intermix inputs of varying bases.
+
 ### Order of Operations
 
 The following order of operations is used to resolve expressions:

@@ -72,6 +72,9 @@ pub enum HistoryIndexKind {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Term<'input> {
     Literal(&'input str),
+    HexLiteral(&'input str),
+    OctLiteral(&'input str),
+    BinLiteral(&'input str),
     Constant(Constant),
     History(HistoryIndexKind, usize),
 }
