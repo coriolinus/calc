@@ -16,7 +16,7 @@ pub Term: Term<'input> = {
     "e" => Term::Constant(Constant::E),
     "pi" => Term::Constant(Constant::Pi),
     "π" => Term::Constant(Constant::Pi),
-    <h:r"@\{([0-9]+)\}"> => Term::History(HistoryIndexKind::Relative, h[2..h.len()-1].parse().unwrap()),
     <h:r"@\[([0-9]+)\]"> => Term::History(HistoryIndexKind::Absolute, h[2..h.len()-1].parse().unwrap()),
+    <h:r"@\{([0-9]+)\}"> => Term::History(HistoryIndexKind::Relative, h[2..h.len()-1].parse().unwrap()),
     <h:r"@+"> => Term::History(HistoryIndexKind::Relative, <>.len()),
 };
