@@ -6,16 +6,16 @@ impl Calcable for f64 {
     const E: Option<Self> = Some(std::f64::consts::E);
     const PI: Option<Self> = Some(std::f64::consts::PI);
 
-    fn parse_binary(_s: &str) -> Option<Self> {
-        None
+    fn parse_binary(_s: &str) -> Result<Self, <Self as Calcable>::Err> {
+        not_implemented("0b...")
     }
 
-    fn parse_octal(_s: &str) -> Option<Self> {
-        None
+    fn parse_octal(_s: &str) -> Result<Self, <Self as Calcable>::Err> {
+        not_implemented("0o...")
     }
 
-    fn parse_hex(_s: &str) -> Option<Self> {
-        None
+    fn parse_hex(_s: &str) -> Result<Self, <Self as Calcable>::Err> {
+        not_implemented("0x...")
     }
 
     fn from_f32(f: f32) -> Option<Self> {

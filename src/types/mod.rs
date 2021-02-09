@@ -4,6 +4,7 @@ use std::{
 };
 
 mod f64;
+mod u64;
 
 #[derive(Debug, thiserror::Error)]
 pub enum ArithmeticError {
@@ -52,17 +53,17 @@ pub trait Calcable:
     /// Parse a binary input without decimals.
     ///
     /// Should succeed with or without a leading `0b`.
-    fn parse_binary(s: &str) -> Option<Self>;
+    fn parse_binary(s: &str) -> Result<Self, <Self as Calcable>::Err>;
 
     /// Parse an octal input without decimals.
     ///
     /// Should succeed with or without a leading `0o`.
-    fn parse_octal(s: &str) -> Option<Self>;
+    fn parse_octal(s: &str) -> Result<Self, <Self as Calcable>::Err>;
 
     /// Parse an octal input without decimals.
     ///
     /// Should succeed with or without a leading `0o`.
-    fn parse_hex(s: &str) -> Option<Self>;
+    fn parse_hex(s: &str) -> Result<Self, <Self as Calcable>::Err>;
 
     /// Instantiate an instance of `Self` from an `f32`.
     ///
@@ -195,21 +196,21 @@ pub trait Calcable:
     fn ln(self) -> Option<Self>;
 
     /// Determine `e**self`
-    fn exp(self) -> Option<Self>;
+    fn exp(self) -> Option<Self> {
+        Self::E?.pow(self).ok()
+    }
 }
 
-/// Strip underscores from the input string
-pub(crate) fn strip_underscore(s: &str) -> String {
+/// Strip underscores and leading bit markers from the input string
+pub(crate) fn clean_input(s: &str, leading: &str) -> String {
     let mut input = String::with_capacity(s.len());
     input.extend(s.chars().filter(|&c| c != '_'));
-    input
+    input.trim_start_matches(leading).to_string()
 }
 
 /// Parse the given string into a `Calcable` instance.
 ///
 /// This implementation strips out underscores.
 pub fn parse<N: Calcable>(s: &str) -> Result<N, <N as FromStr>::Err> {
-    let mut input = String::with_capacity(s.len());
-    input.extend(s.chars().filter(|&c| c != '_'));
-    input.parse()
+    clean_input(s, "0d").parse()
 }
