@@ -69,31 +69,17 @@ pub enum HistoryIndexKind {
 }
 
 /// A term in the expression.
-#[derive(Debug, PartialEq)]
-pub enum Term<N> {
-    Literal(T),
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Term<'input> {
+    Literal(&'input str),
     Constant(Constant),
     History(HistoryIndexKind, usize),
 }
 
-impl<T: Clone> Clone for Term<N> {
-    fn clone(&self) -> Self {
-        match self {
-            Self::Literal(t) => Self::Literal(t.clone()),
-            Self::Constant(c) => Self::Constant(*c),
-            Self::History(ik, n) => Self::History(*ik, *n),
-        }
-    }
-}
-
-impl<T: Copy> Copy for Term<N> {}
-
-impl<T: Eq> Eq for Term<N> {}
-
 /// An expression or subexpression
-pub enum Expr<N> {
-    Term(Term<N>),
-    Prefix(PrefixOperator, Box<Expr<N>>),
-    Infix(Box<Expr<N>>, InfixOperator, Term<N>),
-    Parenthesized(Box<Expr<N>>),
+pub enum Expr<'input> {
+    Term(Term<'input>),
+    Prefix(PrefixOperator, Box<Expr<'input>>),
+    Infix(Box<Expr<'input>>, InfixOperator, Term<'input>),
+    Parenthesized(Box<Expr<'input>>),
 }
