@@ -69,7 +69,7 @@ jobs:
 
     strategy:
       matrix:
-        artifact: [calc-linux.tar.bz2, calc-darwin.tar.bz2, calc-win.zip]
+        artifact: [calc-linux.tar.bz2, calc-darwin.tar.bz2, calc-win.tar.bz2]
 
     runs-on: ubuntu-latest
 
