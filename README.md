@@ -107,8 +107,8 @@ Operations at the same level of precedence are resolved from left to right.
 - `%` : Arithmetic remainder
 - `<<`: Left Shift
 - `>>`: Right Shift
-- `<<<`: Wrapping Left Shift
-- `>>>`: Wrappping Right Shift
+- `<<<`: Wrapping Left Shift (Rotate Left)
+- `>>>`: Wrappping Right Shift (Rotate Right)
 - `&`: Bitwise And
 - `|`: Bitwise Or
 - `^`: Bitwise Xor

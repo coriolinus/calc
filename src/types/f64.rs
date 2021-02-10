@@ -81,11 +81,11 @@ impl Calcable for f64 {
         not_implemented(">>")
     }
 
-    fn wrapping_shl(self, _other: Self) -> Result {
+    fn rotate_left(self, _other: Self) -> Result {
         not_implemented("<<<")
     }
 
-    fn wrapping_shr(self, _other: Self) -> Result {
+    fn rotate_right(self, _other: Self) -> Result {
         not_implemented(">>>")
     }
 

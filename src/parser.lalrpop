@@ -109,8 +109,8 @@ Bitwise: Expr<'input> = {
 ShiftExp: Expr<'input> = {
     <l:ShiftExp> "<<" <r:Unary> => Expr::Infix(Box::new(l), InfixOperator::Lshift, Box::new(r)),
     <l:ShiftExp> ">>" <r:Unary> => Expr::Infix(Box::new(l), InfixOperator::Rshift, Box::new(r)),
-    <l:ShiftExp> "<<<" <r:Unary> => Expr::Infix(Box::new(l), InfixOperator::WrappingLshift, Box::new(r)),
-    <l:ShiftExp> ">>>" <r:Unary> => Expr::Infix(Box::new(l), InfixOperator::WrappingRshift, Box::new(r)),
+    <l:ShiftExp> "<<<" <r:Unary> => Expr::Infix(Box::new(l), InfixOperator::RotateL, Box::new(r)),
+    <l:ShiftExp> ">>>" <r:Unary> => Expr::Infix(Box::new(l), InfixOperator::RotateR, Box::new(r)),
     <l:ShiftExp> "**" <r:Unary> => Expr::Infix(Box::new(l), InfixOperator::Pow, Box::new(r)),
     Unary,
 };

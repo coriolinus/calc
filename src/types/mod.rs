@@ -140,10 +140,10 @@ pub trait Calcable:
     fn shr(self, other: Self) -> Result<Self, <Self as Calcable>::Err>;
 
     /// Compute this value left-shifted by `other` bits, wrapping the bits around.
-    fn wrapping_shl(self, other: Self) -> Result<Self, <Self as Calcable>::Err>;
+    fn rotate_left(self, other: Self) -> Result<Self, <Self as Calcable>::Err>;
 
     /// Compute this value right-shifted by `other` bits, wrapping the bits around.
-    fn wrapping_shr(self, other: Self) -> Result<Self, <Self as Calcable>::Err>;
+    fn rotate_right(self, other: Self) -> Result<Self, <Self as Calcable>::Err>;
 
     /// Compute this value bitwise anded with another.
     fn bit_and(self, other: Self) -> Option<Self>;

@@ -35,8 +35,8 @@ pub enum InfixOperator {
     Rem,
     Lshift,
     Rshift,
-    WrappingLshift,
-    WrappingRshift,
+    RotateL,
+    RotateR,
     BitAnd,
     BitOr,
     BitXor,
@@ -54,8 +54,8 @@ impl InfixOperator {
             Self::Rem => left.rem(right),
             Self::Lshift => left.shl(right),
             Self::Rshift => left.shr(right),
-            Self::WrappingLshift => left.wrapping_shl(right),
-            Self::WrappingRshift => left.wrapping_shr(right),
+            Self::RotateL => left.rotate_left(right),
+            Self::RotateR => left.rotate_right(right),
             Self::BitAnd => left
                 .bit_and(right)
                 .ok_or_else(|| N::Err::unimplemented("&")),
@@ -162,13 +162,20 @@ impl<'input> Term<'input> {
             Self::Constant(Constant::E) => N::E.ok_or_else(|| N::Err::unimplemented("e")),
             Self::Constant(Constant::Pi) => N::PI.ok_or_else(|| N::Err::unimplemented("pi")),
             Self::History(kind, idx) => {
-                let idx = match kind {
-                    HistoryIndexKind::Absolute => *idx,
-                    HistoryIndexKind::Relative => ctx.history.len() - *idx,
-                };
-                match ctx.history.get(idx) {
+                let real_idx =
+                    match kind {
+                        HistoryIndexKind::Absolute => *idx,
+                        HistoryIndexKind::Relative => ctx.history.len().checked_sub(*idx).ok_or(
+                            N::Err::history_out_of_bounds(*kind, *idx, ctx.history.len()),
+                        )?,
+                    };
+                match ctx.history.get(real_idx) {
                     Some(n) => Ok(n.clone()),
-                    None => Err(N::Err::history_out_of_bounds(*kind, idx, ctx.history.len())),
+                    None => Err(N::Err::history_out_of_bounds(
+                        *kind,
+                        *idx,
+                        ctx.history.len(),
+                    )),
                 }
             }
         }

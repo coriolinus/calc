@@ -88,12 +88,12 @@ impl Calcable for u64 {
         Ok(self >> other)
     }
 
-    fn wrapping_shl(self, other: Self) -> Result {
-        Ok(self.wrapping_shl(as_u32(other)?))
+    fn rotate_left(self, other: Self) -> Result {
+        Ok(self.rotate_left(as_u32(other)?))
     }
 
-    fn wrapping_shr(self, other: Self) -> Result {
-        Ok(self.wrapping_shr(as_u32(other)?))
+    fn rotate_right(self, other: Self) -> Result {
+        Ok(self.rotate_right(as_u32(other)?))
     }
 
     fn bit_and(self, other: Self) -> Option<Self> {

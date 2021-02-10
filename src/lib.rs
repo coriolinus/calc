@@ -17,7 +17,7 @@ where
     <N as Calcable>::Err: 'static,
 {
     #[error("Parsing")]
-    Parse(#[from] ParseError<usize, String, &'static str>),
+    Parse(#[from] ParseError<usize, &'static str, &'static str>),
     #[error("Evaluating")]
     Eval(#[source] <N as Calcable>::Err),
 }
@@ -30,9 +30,7 @@ where
     /// Evaluate an expression in this context.
     pub fn evaluate(&mut self, expr: &str) -> Result<N, Error<N>> {
         let parser = ExprParser::new();
-        let expr = parser
-            .parse(expr)
-            .map_err(|err| err.map_token(|token| token.to_string()))?;
+        let expr = parser.parse(expr).map_err(|err| err.map_token(|_| ""))?;
         let result = expr.evaluate(&self).map_err(Error::Eval)?;
         self.history.push(result.clone());
         Ok(result)
