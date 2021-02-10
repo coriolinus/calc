@@ -55,7 +55,8 @@ jobs:
 
           tar -cvjf "$archive" "$bin"
           echo "artifact=$archive" >> "$GITHUB_ENV"
-      - run: ls -lh "${{ env.artifact }}"
+
+          ls -lh "$bin" "$archive"
       - uses: actions/upload-artifact@v2
         with:
           name: "${{ env.artifact }}"
