@@ -1,9 +1,18 @@
 # `calc`
 
+![Build and Test Status](https://github.com/coriolinus/calc/workflows/.github/workflows/rust.yml/badge.svg?branch=main)
+
 Yet another CLI calculator. Inspired by the excellent <https://github.com/alfredxing/calc>.
 
-**Note**: Currently, almost no features are yet implemented. This README can be considered a roadmap of planned features
-rather than a usage document.
+## Installation
+
+With a Rust installation, you can always install the head of `main` with:
+
+```sh
+cargo install --force --git https://github.com/coriolinus/calc.git --branch main
+```
+
+Alternately, you can download a precompiled executable of the most recent [release](https://github.com/coriolinus/calc/releases).
 
 ## Usage
 
@@ -37,10 +46,6 @@ NaN
 ```
 
 In the absence of non-flag arguments, `calc` launches a simple shell which just evaluates each line of input.
-
-### No Implicit Multiplication
-
-Implicit multiplication is not supported. Use a multiplication operator such as `*`.
 
 ## Reference
 
@@ -160,6 +165,22 @@ it is equivalent to `@`. `@{3}` refers to the result 3 expressions ago; it is eq
 
 The pseuaovariable `@[0]` always refers to the result of the first expression in this shell session.
 Likewise, `@[1]` refers to the second, and so on. The shell interface indicates the current expression.
+
+## Warnings
+
+### No Implicit Multiplication
+
+Implicit multiplication is not supported. Use a multiplication operator such as `*`.
+
+### Floating Point Errors
+
+Floating point operations can compound lossily, and `calc` makes no special efforts to guard against
+this kind of error. For example:
+
+```sh
+$ calc 'sin(rad(45)) - (sqrt(2) / 2)'
+-0.00000000000000011102230246251565
+```
 
 ## Crate Structure
 
