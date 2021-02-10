@@ -135,6 +135,10 @@ pub enum Constant {
     Pi,
 }
 
+/// What kind of history lookup is desired.
+///
+/// Absolute history lookups begin at 0 and increment.
+/// Relative history lookups count backwards from the current expression.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum HistoryIndexKind {
     Relative,
@@ -194,6 +198,8 @@ pub enum Expr<'input> {
 
 impl<'input> Expr<'input> {
     /// Evaluate this expression into its mathematical result.
+    ///
+    /// This both returns the calculated value and stores a copy in the context's history.
     pub(crate) fn evaluate<N: Calcable>(
         &self,
         ctx: &Context<N>,
