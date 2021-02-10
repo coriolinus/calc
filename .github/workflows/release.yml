@@ -44,6 +44,16 @@ jobs:
           fi
           mv "$bin" .
           bin="$(basename "$bin")"
+          file "$bin"
+
+          if [[ "$archive" == *mingw* ]]; then
+            # in this case, the file doesn't end with .exe, but we're still building for windows
+            # let's fix that
+            mv "$bin" "$bin.exe"
+            bin="$bin.exe"
+            archive=calc-win.zip
+          fi
+
           if [[ "$archive" == *.zip ]]; then
             zip "$archive" "$bin"
           else
