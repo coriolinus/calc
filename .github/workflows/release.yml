@@ -19,6 +19,7 @@ jobs:
 
     runs-on: "${{ matrix.os }}"
     steps:
+      - uses: actions/checkout@v2
       - uses: actions/cache@v2
         with:
           path: |
@@ -26,7 +27,6 @@ jobs:
             ~/.cargo/git
             target
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-      - uses: actions/checkout@v2
       - name: build
         run: RUSTFLAGS='-C link-arg=-s' cargo build --release
       - name: identify the artifact and name it per the os
