@@ -12,8 +12,8 @@ rather than a usage document.
 ```sh
 $ calc "1/(2+(3*(4-5)))"
 -1
-$ calc 12345 / 543 --round 2
-22.73
+$ calc "round(12345 / 543)"
+23
 ```
 
 When non-flag arguments are present, `calc` interprets them as an expression and evaluates them immediately.
@@ -54,10 +54,6 @@ can be chosen by command-line flag:
 - `f64` (default): signed 64-bit floating point operations
 - `u64`: unsigned 64-bit integer operations
 - `i64`: signed 64-bit integer operations
-- `decimal N`: signed fixed-position decimal operations building on the [`bigdecimal` crate](https://crates.io/crates/bigdecimal)
-- `rat64`: signed 64-bit rational operations building on the [`num_rational` crate](https://crates.io/crates/num_rational)
-- `bigrat`: signed arbitrary-precision rational operations building on the [`num_rational` crate](https://crates.io/crates/num_rational)
-- `bigint`: signed arbitrary-precision integer operations building on the [`num_bigint` crate](https://crates.io/crates/num_bigint)
 
 Note that the data type chosen will restrict the available operators, functions, and constants. For example, trigonometric operations
 are not available on integers, and bit-shifting operations are not available on floats.
