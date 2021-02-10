@@ -23,11 +23,12 @@ jobs:
         run: RUSTFLAGS='-C link-arg=-s' cargo build --release
       - name: identify the artifact and name it per the os
         run: |
+          set -e -x
           artifact="$(cut -d: -f1 < target/release/calc.d)"
           new_name="$(printf '%s-%s' "$(basename "$artifact")" "$(uname | tr '[:upper:]' '[:lower:]')")"
           mv "$artifact" "$new_name"
-          echo "artifact=$artifact" >> "$GITHUB_ENV"
-      - run: echo "${{ env.artifact }}"
+          echo "artifact=$new_name" >> "$GITHUB_ENV"
+      - run: ls -lh "${{ env.artifact }}"
       - name: Upload the artifact
         uses: skx/github-action-publish-binaries@master
         env:
