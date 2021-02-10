@@ -198,8 +198,6 @@ pub enum Expr<'input> {
 
 impl<'input> Expr<'input> {
     /// Evaluate this expression into its mathematical result.
-    ///
-    /// This both returns the calculated value and stores a copy in the context's history.
     pub(crate) fn evaluate<N: Calcable>(
         &self,
         ctx: &Context<N>,
