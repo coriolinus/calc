@@ -11,7 +11,7 @@ fn main() -> anyhow::Result<()> {
 
 #[cfg(feature = "cli")]
 mod impl_main {
-    use anyhow::{anyhow, bail, Result};
+    use anyhow::{bail, Result};
     use calc::{types::Calcable, Context, Error};
     use structopt::StructOpt;
 
@@ -120,10 +120,36 @@ mod impl_main {
         Ok(())
     }
 
+    fn shell_as(ty: Type) -> Result<()> {
+        match ty {
+            Type::F64 => shell::<f64>(),
+            Type::U64 => shell::<u64>(),
+            Type::I64 => shell::<i64>(),
+        }
+    }
+
+    fn shell<N>() -> Result<()>
+    where
+        N: std::fmt::Debug + Default + Calcable,
+        <N as Calcable>::Err: 'static + std::error::Error + Send + Sync,
+    {
+        let mut ctx = Context::<N>::default();
+        let mut rl = rustyline::Editor::<()>::new();
+
+        loop {
+            let expr = rl.readline(&format!("[{}]: ", ctx.history.len()))?;
+            if let Err(err) = eval_and_print(&mut ctx, &expr) {
+                println!("{}", err);
+            } else {
+                rl.add_history_entry(expr);
+            }
+        }
+    }
+
     pub(crate) fn real() -> Result<()> {
         let opt = Opt::from_args();
         if opt.expression.len() == 0 {
-            Err(anyhow!("shell mode is not yet implemented"))
+            shell_as(opt.get_type()?)
         } else {
             eval_as(opt.get_type()?, &opt.expr())
         }

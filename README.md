@@ -22,11 +22,11 @@ When non-flag arguments are present, `calc` interprets them as an expression and
 
 ```sh
 $ calc
-[0]: 1+1
+[0]: 1 + 1
 2
 [1]: 3*(5/(3-4))
 -15
-[2]: 3xpi^2
+[2]: 3*pi**2
 29.608813203268074
 [3]: @+1
 30.608813203268074
@@ -34,8 +34,6 @@ $ calc
 -30
 [5]: ln(-1)
 NaN
-> exit
-$
 ```
 
 In the absence of non-flag arguments, `calc` launches a simple shell which just evaluates each line of input.
