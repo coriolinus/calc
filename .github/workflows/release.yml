@@ -32,10 +32,22 @@ jobs:
       - name: identify the artifact and name it per the os
         run: |
           set -e -x
-          artifact="$(cut -d: -f1 < target/release/calc.d)"
-          new_name="$(printf '%s-%s' "$(basename "$artifact")" "$(uname | tr '[:upper:]' '[:lower:]')")"
-          mv "$artifact" "$new_name"
-          echo "artifact=$new_name" >> "$GITHUB_ENV"
+          bin=target/release/calc
+          archive="$(printf 'calc-%s.tar.bz2' "$(uname | tr '[:upper:]' '[:lower:]')")"
+          if [ ! -f "$bin" ]; then
+            bin="$bin.exe"
+            archive=calc-win.zip
+          fi
+          if [ ! -f "$bin" ]; then
+            echo "could not locate compiled executable"
+            exit 1
+          fi
+          if [[ "$archive" == *.zip ]]; then
+            zip "$archive" "$bin"
+          else
+            tar -cvjf "$archive" "$bin"
+          fi
+          echo "artifact=$bin" >> "$GITHUB_ENV"
       - run: ls -lh "${{ env.artifact }}"
       - uses: actions/upload-artifact@v2
         with:
@@ -50,7 +62,7 @@ jobs:
 
     strategy:
       matrix:
-        artifact: [calc-linux, calc-darwin, calc-windows]
+        artifact: [calc-linux.tar.bz2, calc-darwin.tar.bz2, calc-win.zip]
 
     runs-on: ubuntu-latest
 
