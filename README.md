@@ -1,6 +1,6 @@
 # `calc`
 
-![Build and Test Status](https://github.com/coriolinus/calc/workflows/.github/workflows/rust.yml/badge.svg?branch=main)
+[![Build and Test Status](https://github.com/coriolinus/calc/workflows/Build%20and%20Test/badge.svg?branch=main)](https://github.com/coriolinus/calc/actions?query=branch%3Amain+workflow%3A%22Build+and+Test%22)
 
 Yet another CLI calculator. Inspired by the excellent <https://github.com/alfredxing/calc>.
 
