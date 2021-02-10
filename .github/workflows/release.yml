@@ -1,0 +1,35 @@
+on:
+  release:
+    types: [created]
+
+name: Release
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build-release-binaries:
+    name: Build Release Binaries
+
+    strategy:
+      matrix:
+        # os: [ubuntu-latest, windows-latest, macos-latest]
+        # for testing, just run one
+        os: [ubuntu-latest]
+
+    runs-on: "${{ matrix.os }}"
+    steps:
+      - uses: actions/checkout@v2
+      - name: build
+        run: RUSTFLAGS='-C link-arg=-s' cargo build --release
+      - name: identify the artifacts
+        run: |
+          echo "artifact="$(find target/release -maxdepth 1 -type f -executable -print | head -n 1)"" >> $GITHUB_ENV
+      - run: echo "$artifact"
+      - name: Upload the artifact
+        uses: skx/github-action-publish-binaries@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: "${{ env.artifact }}"
