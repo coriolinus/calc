@@ -36,7 +36,6 @@ jobs:
           archive="$(printf 'calc-%s.tar.bz2' "$(uname | tr '[:upper:]' '[:lower:]')")"
           if [ ! -f "$bin" ]; then
             bin="$bin.exe"
-            archive=calc-win.zip
           fi
           if [ ! -f "$bin" ]; then
             echo "could not locate compiled executable"
@@ -51,14 +50,10 @@ jobs:
             # let's fix that
             mv "$bin" "$bin.exe"
             bin="$bin.exe"
-            archive=calc-win.zip
+            archive=calc-win.tar.bz2
           fi
 
-          if [[ "$archive" == *.zip ]]; then
-            zip "$archive" "$bin"
-          else
-            tar -cvjf "$archive" "$bin"
-          fi
+          tar -cvjf "$archive" "$bin"
           echo "artifact=$archive" >> "$GITHUB_ENV"
       - run: ls -lh "${{ env.artifact }}"
       - uses: actions/upload-artifact@v2
