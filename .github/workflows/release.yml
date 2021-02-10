@@ -42,12 +42,14 @@ jobs:
             echo "could not locate compiled executable"
             exit 1
           fi
+          mv "$bin" .
+          bin="$(basename "$bin")"
           if [[ "$archive" == *.zip ]]; then
             zip "$archive" "$bin"
           else
             tar -cvjf "$archive" "$bin"
           fi
-          echo "artifact=$bin" >> "$GITHUB_ENV"
+          echo "artifact=$archive" >> "$GITHUB_ENV"
       - run: ls -lh "${{ env.artifact }}"
       - uses: actions/upload-artifact@v2
         with:
