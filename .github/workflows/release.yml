@@ -21,10 +21,13 @@ jobs:
       - uses: actions/checkout@v2
       - name: build
         run: RUSTFLAGS='-C link-arg=-s' cargo build --release
-      - name: identify the artifacts
+      - name: identify the artifact and name it per the os
         run: |
-          echo "artifact="$(find target/release -maxdepth 1 -type f -executable -print | head -n 1)"" >> $GITHUB_ENV
-      - run: echo "$artifact"
+          artifact="$(cut -d: -f1 < target/release/calc.d)"
+          new_name="$(printf '%s-%s' "$(basename "$artifact")" "$(uname | tr '[:upper:]' '[:lower:]')")"
+          mv "$artifact" "$new_name"
+          echo "artifact=$artifact" >> "$GITHUB_ENV"
+      - run: echo "${{ env.artifact }}"
       - name: Upload the artifact
         uses: skx/github-action-publish-binaries@master
         env:
