@@ -1,22 +1,13 @@
 use super::{clean_input, ArithmeticError, BasicError, Calcable};
 
-#[derive(Debug, thiserror::Error)]
-pub enum Error {
-    #[error(transparent)]
-    Basic(#[from] BasicError<i64>),
-    #[error(transparent)]
-    Parse(#[from] std::num::ParseIntError),
-}
+pub type Error = BasicError<i64, std::num::ParseIntError>;
+pub type Result = std::result::Result<i64, Error>;
 
-fn as_u32(n: i64) -> Result<u32, Error> {
+fn as_u32(n: i64) -> std::result::Result<u32, Error> {
     if n > (u32::MAX as i64) {
-        Err(Error::Basic(BasicError::Arithmetic(
-            ArithmeticError::Overflow,
-        )))
+        Err(Error::Arithmetic(ArithmeticError::Overflow))
     } else if n < 0 {
-        Err(Error::Basic(BasicError::Arithmetic(
-            ArithmeticError::Underflow,
-        )))
+        Err(Error::Arithmetic(ArithmeticError::Underflow))
     } else {
         Ok(n as u32)
     }
@@ -28,16 +19,20 @@ impl Calcable for i64 {
     const E: Option<Self> = None;
     const PI: Option<Self> = None;
 
-    fn parse_binary(s: &str) -> Result<Self, <Self as Calcable>::Err> {
-        i64::from_str_radix(&clean_input(s, "0b"), 2).map_err(Into::into)
+    fn parse_binary(s: &str) -> Result {
+        i64::from_str_radix(&clean_input(s, "0b"), 2).map_err(Error::Parse)
     }
 
-    fn parse_octal(s: &str) -> Result<Self, <Self as Calcable>::Err> {
-        i64::from_str_radix(&clean_input(s, "0o"), 8).map_err(Into::into)
+    fn parse_octal(s: &str) -> Result {
+        i64::from_str_radix(&clean_input(s, "0o"), 8).map_err(Error::Parse)
     }
 
-    fn parse_hex(s: &str) -> Result<Self, <Self as Calcable>::Err> {
-        i64::from_str_radix(&clean_input(s, "0x"), 16).map_err(Into::into)
+    fn parse_decimal(s: &str) -> Result {
+        i64::from_str_radix(&clean_input(s, "0d"), 10).map_err(Error::Parse)
+    }
+
+    fn parse_hex(s: &str) -> Result {
+        i64::from_str_radix(&clean_input(s, "0x"), 16).map_err(Error::Parse)
     }
 
     fn from_f32(f: f32) -> Option<Self> {
@@ -52,54 +47,54 @@ impl Calcable for i64 {
         Some(!self)
     }
 
-    fn add(self, other: Self) -> Result<Self, <Self as Calcable>::Err> {
+    fn add(self, other: Self) -> Result {
         self.checked_add(other)
             .ok_or(BasicError::Arithmetic(ArithmeticError::Overflow).into())
     }
 
-    fn sub(self, other: Self) -> Result<Self, <Self as Calcable>::Err> {
+    fn sub(self, other: Self) -> Result {
         self.checked_sub(other)
             .ok_or(BasicError::Arithmetic(ArithmeticError::Underflow).into())
     }
 
-    fn mul(self, other: Self) -> Result<Self, <Self as Calcable>::Err> {
+    fn mul(self, other: Self) -> Result {
         self.checked_mul(other)
             .ok_or(BasicError::Arithmetic(ArithmeticError::Overflow).into())
     }
 
-    fn div(self, other: Self) -> Result<Self, <Self as Calcable>::Err> {
+    fn div(self, other: Self) -> Result {
         self.checked_div(other)
             .ok_or(BasicError::Arithmetic(ArithmeticError::DivideBy0).into())
     }
 
-    fn trunc_div(self, other: Self) -> Result<Self, <Self as Calcable>::Err> {
+    fn trunc_div(self, other: Self) -> Result {
         self.div(other)
     }
 
-    fn pow(self, other: Self) -> Result<Self, <Self as Calcable>::Err> {
+    fn pow(self, other: Self) -> Result {
         let other = as_u32(other)?;
         self.checked_pow(other)
             .ok_or(BasicError::Arithmetic(ArithmeticError::Overflow).into())
     }
 
-    fn rem(self, other: Self) -> Result<Self, <Self as Calcable>::Err> {
+    fn rem(self, other: Self) -> Result {
         self.checked_rem(other)
             .ok_or(BasicError::Arithmetic(ArithmeticError::DivideBy0).into())
     }
 
-    fn shl(self, other: Self) -> Result<Self, <Self as Calcable>::Err> {
+    fn shl(self, other: Self) -> Result {
         Ok(self << other)
     }
 
-    fn shr(self, other: Self) -> Result<Self, <Self as Calcable>::Err> {
+    fn shr(self, other: Self) -> Result {
         Ok(self >> other)
     }
 
-    fn wrapping_shl(self, other: Self) -> Result<Self, <Self as Calcable>::Err> {
+    fn wrapping_shl(self, other: Self) -> Result {
         Ok(self.wrapping_shl(as_u32(other)?))
     }
 
-    fn wrapping_shr(self, other: Self) -> Result<Self, <Self as Calcable>::Err> {
+    fn wrapping_shr(self, other: Self) -> Result {
         Ok(self.wrapping_shr(as_u32(other)?))
     }
 

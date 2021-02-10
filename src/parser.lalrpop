@@ -37,7 +37,7 @@ FuncName: Function = {
     "acosh" => Function::Acosh,
     "atanh" => Function::Atanh,
     "rad" => Function::Rad,
-    "dec" => Function::Dec,
+    "deg" => Function::Deg,
     "sqrt" => Function::Sqrt,
     "cbrt" => Function::Cbrt,
     "log" => Function::Log,
@@ -111,7 +111,7 @@ ShiftExp: Expr<'input> = {
     <l:ShiftExp> ">>" <r:Unary> => Expr::Infix(Box::new(l), InfixOperator::Rshift, Box::new(r)),
     <l:ShiftExp> "<<<" <r:Unary> => Expr::Infix(Box::new(l), InfixOperator::WrappingLshift, Box::new(r)),
     <l:ShiftExp> ">>>" <r:Unary> => Expr::Infix(Box::new(l), InfixOperator::WrappingRshift, Box::new(r)),
-    <l:ShiftExp> "**" <r:Unary> => Expr::Infix(Box::new(l), InfixOperator::Exp, Box::new(r)),
+    <l:ShiftExp> "**" <r:Unary> => Expr::Infix(Box::new(l), InfixOperator::Pow, Box::new(r)),
     Unary,
 };
 

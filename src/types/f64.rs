@@ -1,20 +1,27 @@
 use super::{not_implemented, ArithmeticError, BasicError, Calcable};
 
+pub type Error = BasicError<f64, std::num::ParseFloatError>;
+pub type Result = std::result::Result<f64, Error>;
+
 impl Calcable for f64 {
-    type Err = BasicError<f64>;
+    type Err = Error;
 
     const E: Option<Self> = Some(std::f64::consts::E);
     const PI: Option<Self> = Some(std::f64::consts::PI);
 
-    fn parse_binary(_s: &str) -> Result<Self, <Self as Calcable>::Err> {
+    fn parse_binary(_s: &str) -> Result {
         not_implemented("0b...")
     }
 
-    fn parse_octal(_s: &str) -> Result<Self, <Self as Calcable>::Err> {
+    fn parse_octal(_s: &str) -> Result {
         not_implemented("0o...")
     }
 
-    fn parse_hex(_s: &str) -> Result<Self, <Self as Calcable>::Err> {
+    fn parse_decimal(s: &str) -> Result {
+        s.parse().map_err(BasicError::Parse)
+    }
+
+    fn parse_hex(_s: &str) -> Result {
         not_implemented("0x...")
     }
 
@@ -30,19 +37,19 @@ impl Calcable for f64 {
         None
     }
 
-    fn add(self, other: Self) -> Result<Self, <Self as Calcable>::Err> {
+    fn add(self, other: Self) -> Result {
         Ok(self + other)
     }
 
-    fn sub(self, other: Self) -> Result<Self, <Self as Calcable>::Err> {
+    fn sub(self, other: Self) -> Result {
         Ok(self - other)
     }
 
-    fn mul(self, other: Self) -> Result<Self, <Self as Calcable>::Err> {
+    fn mul(self, other: Self) -> Result {
         Ok(self * other)
     }
 
-    fn div(self, other: Self) -> Result<Self, <Self as Calcable>::Err> {
+    fn div(self, other: Self) -> Result {
         if other == 0.0 {
             Err(ArithmeticError::DivideBy0.into())
         } else {
@@ -50,15 +57,15 @@ impl Calcable for f64 {
         }
     }
 
-    fn trunc_div(self, other: Self) -> Result<Self, <Self as Calcable>::Err> {
+    fn trunc_div(self, other: Self) -> Result {
         self.div(other).map(|quot| quot.floor())
     }
 
-    fn pow(self, other: Self) -> Result<Self, <Self as Calcable>::Err> {
+    fn pow(self, other: Self) -> Result {
         Ok(self.powf(other))
     }
 
-    fn rem(self, other: Self) -> Result<Self, <Self as Calcable>::Err> {
+    fn rem(self, other: Self) -> Result {
         if other == 0.0 {
             Err(ArithmeticError::DivideBy0.into())
         } else {
@@ -66,19 +73,19 @@ impl Calcable for f64 {
         }
     }
 
-    fn shl(self, _other: Self) -> Result<Self, <Self as Calcable>::Err> {
+    fn shl(self, _other: Self) -> Result {
         not_implemented("<<")
     }
 
-    fn shr(self, _other: Self) -> Result<Self, <Self as Calcable>::Err> {
+    fn shr(self, _other: Self) -> Result {
         not_implemented(">>")
     }
 
-    fn wrapping_shl(self, _other: Self) -> Result<Self, <Self as Calcable>::Err> {
+    fn wrapping_shl(self, _other: Self) -> Result {
         not_implemented("<<<")
     }
 
-    fn wrapping_shr(self, _other: Self) -> Result<Self, <Self as Calcable>::Err> {
+    fn wrapping_shr(self, _other: Self) -> Result {
         not_implemented(">>>")
     }
 

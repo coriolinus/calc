@@ -1,7 +1,5 @@
-use std::{
-    ops::{Add, Div, Mul, Sub},
-    str::FromStr,
-};
+use crate::ast::HistoryIndexKind;
+use std::ops::{Add, Div, Mul, Sub};
 
 mod f64;
 mod i64;
@@ -18,17 +16,51 @@ pub enum ArithmeticError {
 }
 
 #[derive(Debug, thiserror::Error)]
-pub enum BasicError<T: std::fmt::Debug> {
+pub enum BasicError<T: std::fmt::Debug, E: 'static + std::error::Error> {
     #[error(transparent)]
     Arithmetic(#[from] ArithmeticError),
     #[error("operation `{0}` not implemented for {}", std::any::type_name::<T>())]
     NotImplemented(&'static str, std::marker::PhantomData<T>),
+    #[error("parsing: {0}")]
+    Parse(#[source] E),
+    #[error("{0:?} history index {1} out of bounds: [0..{2})")]
+    HistoryOOB(HistoryIndexKind, usize, usize),
 }
 
-pub(crate) fn not_implemented<T: std::fmt::Debug>(
-    symbol: &'static str,
-) -> Result<T, BasicError<T>> {
+pub(crate) fn not_implemented<T, E>(symbol: &'static str) -> Result<T, BasicError<T, E>>
+where
+    T: std::fmt::Debug,
+    E: std::error::Error,
+{
     Err(BasicError::NotImplemented(symbol, std::marker::PhantomData))
+}
+
+impl<T, E> CalcableError for BasicError<T, E>
+where
+    T: std::fmt::Debug,
+    E: 'static + std::error::Error,
+{
+    fn unimplemented(operation: &'static str) -> Self {
+        Self::NotImplemented(operation, std::marker::PhantomData)
+    }
+
+    fn history_out_of_bounds(
+        kind: HistoryIndexKind,
+        requested_index: usize,
+        history_len: usize,
+    ) -> Self {
+        Self::HistoryOOB(kind, requested_index, history_len)
+    }
+}
+
+/// A `CalcableError` can always have certain variants.
+pub trait CalcableError {
+    fn unimplemented(operation: &'static str) -> Self;
+    fn history_out_of_bounds(
+        kind: HistoryIndexKind,
+        requested_index: usize,
+        history_len: usize,
+    ) -> Self;
 }
 
 /// A trait indicating that this type is suitable for usage in this program.
@@ -38,15 +70,13 @@ pub(crate) fn not_implemented<T: std::fmt::Debug>(
 /// will result in an "unimplemented" error message bubbling up to the user.
 pub trait Calcable:
     Clone
-    + FromStr
     + std::fmt::Display
     + Add<Output = Self>
     + Sub<Output = Self>
     + Mul<Output = Self>
     + Div<Output = Self>
-    + PartialEq
 {
-    type Err;
+    type Err: std::error::Error + CalcableError;
 
     const E: Option<Self>;
     const PI: Option<Self>;
@@ -60,6 +90,11 @@ pub trait Calcable:
     ///
     /// Should succeed with or without a leading `0o`.
     fn parse_octal(s: &str) -> Result<Self, <Self as Calcable>::Err>;
+
+    /// Parse a decimal input which may or may not contain a decimal point.
+    ///
+    /// Should succeed with or without a leading `0d`.
+    fn parse_decimal(s: &str) -> Result<Self, <Self as Calcable>::Err>;
 
     /// Parse an octal input without decimals.
     ///
@@ -207,11 +242,4 @@ pub(crate) fn clean_input(s: &str, leading: &str) -> String {
     let mut input = String::with_capacity(s.len());
     input.extend(s.chars().filter(|&c| c != '_'));
     input.trim_start_matches(leading).to_string()
-}
-
-/// Parse the given string into a `Calcable` instance.
-///
-/// This implementation strips out underscores.
-pub fn parse<N: Calcable>(s: &str) -> Result<N, <N as FromStr>::Err> {
-    clean_input(s, "0d").parse()
 }
