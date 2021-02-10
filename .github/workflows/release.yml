@@ -10,7 +10,8 @@ defaults:
 
 jobs:
   build-release-binaries:
-    name: Build Release Binaries
+    name: Build binaries for release
+    continue-on-error: true
 
     strategy:
       matrix:
@@ -18,6 +19,13 @@ jobs:
 
     runs-on: "${{ matrix.os }}"
     steps:
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
       - uses: actions/checkout@v2
       - name: build
         run: RUSTFLAGS='-C link-arg=-s' cargo build --release
@@ -29,9 +37,30 @@ jobs:
           mv "$artifact" "$new_name"
           echo "artifact=$new_name" >> "$GITHUB_ENV"
       - run: ls -lh "${{ env.artifact }}"
-      - name: Upload the artifact
+      - uses: actions/upload-artifact@v2
+        with:
+          name: "${{ env.artifact }}"
+          path: "${{ env.artifact }}"
+
+  upload-release-binaries:
+    name: Add binaries to release
+    if: always()
+    needs: build-release-binaries
+    continue-on-error: true
+
+    strategy:
+      matrix:
+        artifact: [calc-linux, calc-darwin, calc-windows]
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/download-artifact@v2
+        with:
+          name: "${{ matrix.artifact }}"
+      - name: Add to release
         uses: skx/github-action-publish-binaries@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          args: "${{ env.artifact }}"
+          args: "${{ matrix.artifact }}"
