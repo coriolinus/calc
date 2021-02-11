@@ -148,7 +148,7 @@ mod impl_main {
 
     pub(crate) fn real() -> Result<()> {
         let opt = Opt::from_args();
-        if opt.expression.len() == 0 {
+        if opt.expression.is_empty() {
             shell_as(opt.get_type()?)
         } else {
             eval_as(opt.get_type()?, &opt.expr())

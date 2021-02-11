@@ -5,7 +5,8 @@ use crate::{
     Context,
 };
 
-lalrpop_mod!(pub parser);
+// no point getting style warnings for generated code
+lalrpop_mod!(#[allow(clippy::all)] pub parser);
 
 /// A prefix operator.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -166,13 +167,14 @@ impl<'input> Term<'input> {
             Self::Constant(Constant::E) => N::E.ok_or_else(|| N::Err::unimplemented("e")),
             Self::Constant(Constant::Pi) => N::PI.ok_or_else(|| N::Err::unimplemented("pi")),
             Self::History(kind, idx) => {
-                let real_idx =
-                    match kind {
-                        HistoryIndexKind::Absolute => *idx,
-                        HistoryIndexKind::Relative => ctx.history.len().checked_sub(*idx).ok_or(
-                            N::Err::history_out_of_bounds(*kind, *idx, ctx.history.len()),
-                        )?,
-                    };
+                let real_idx = match kind {
+                    HistoryIndexKind::Absolute => *idx,
+                    HistoryIndexKind::Relative => {
+                        ctx.history.len().checked_sub(*idx).ok_or_else(|| {
+                            N::Err::history_out_of_bounds(*kind, *idx, ctx.history.len())
+                        })?
+                    }
+                };
                 match ctx.history.get(real_idx) {
                     Some(n) => Ok(n.clone()),
                     None => Err(N::Err::history_out_of_bounds(

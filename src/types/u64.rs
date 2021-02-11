@@ -47,22 +47,22 @@ impl Calcable for u64 {
 
     fn add(self, other: Self) -> Result {
         self.checked_add(other)
-            .ok_or(BasicError::Arithmetic(ArithmeticError::Overflow).into())
+            .ok_or(BasicError::Arithmetic(ArithmeticError::Overflow))
     }
 
     fn sub(self, other: Self) -> Result {
         self.checked_sub(other)
-            .ok_or(BasicError::Arithmetic(ArithmeticError::Underflow).into())
+            .ok_or(BasicError::Arithmetic(ArithmeticError::Underflow))
     }
 
     fn mul(self, other: Self) -> Result {
         self.checked_mul(other)
-            .ok_or(BasicError::Arithmetic(ArithmeticError::Overflow).into())
+            .ok_or(BasicError::Arithmetic(ArithmeticError::Overflow))
     }
 
     fn div(self, other: Self) -> Result {
         self.checked_div(other)
-            .ok_or(BasicError::Arithmetic(ArithmeticError::DivideBy0).into())
+            .ok_or(BasicError::Arithmetic(ArithmeticError::DivideBy0))
     }
 
     fn trunc_div(self, other: Self) -> Result {
@@ -72,12 +72,12 @@ impl Calcable for u64 {
     fn pow(self, other: Self) -> Result {
         let other = as_u32(other)?;
         self.checked_pow(other)
-            .ok_or(BasicError::Arithmetic(ArithmeticError::Overflow).into())
+            .ok_or(BasicError::Arithmetic(ArithmeticError::Overflow))
     }
 
     fn rem(self, other: Self) -> Result {
         self.checked_rem(other)
-            .ok_or(BasicError::Arithmetic(ArithmeticError::DivideBy0).into())
+            .ok_or(BasicError::Arithmetic(ArithmeticError::DivideBy0))
     }
 
     fn shl(self, other: Self) -> Result {
