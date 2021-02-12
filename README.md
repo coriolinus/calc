@@ -6,10 +6,10 @@ Yet another CLI calculator. Inspired by the excellent <https://github.com/alfred
 
 ## Installation
 
-With a Rust installation, you can always install the head of `main` with:
+With a Rust toolchain in place:
 
 ```sh
-cargo install --force --git https://github.com/coriolinus/calc.git --branch main
+cargo install --force calc
 ```
 
 Alternately, you can download a precompiled executable of the most recent [release](https://github.com/coriolinus/calc/releases).
