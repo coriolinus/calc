@@ -6,6 +6,13 @@ edition = "2018"
 description = "CLI calculator app"
 license = "GPL-3.0-only"
 repository = "https://github.com/coriolinus/calc"
+categories = [
+    "command-line-interface",
+    "command-line-utilities",
+    "mathematics",
+]
+keywords = ["calculator", "cli"]
+
 
 [dependencies]
 anyhow = { version = "1.0.38", optional = true }
