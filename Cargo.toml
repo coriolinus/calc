@@ -3,8 +3,9 @@ name = "calc"
 version = "0.1.0"
 authors = ["Peter Goodspeed-Niklaus <peter.r.goodspeedniklaus@gmail.com>"]
 edition = "2018"
-description = "Featureful CLI calculator app"
+description = "CLI calculator app"
 license = "GPL-3.0-only"
+repository = "https://github.com/coriolinus/calc"
 
 [dependencies]
 anyhow = { version = "1.0.38", optional = true }
