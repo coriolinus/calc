@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.3.0] - 2021-02-24
+
+Enable output formatting.
+
 ## [0.2.1] - 2021-02-12
 
 Update installation instructions, create changelog.

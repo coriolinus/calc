@@ -13,6 +13,7 @@ fn main() -> anyhow::Result<()> {
 mod impl_main {
     use anyhow::{bail, Result};
     use calc::{types::Calcable, Context, Error};
+    use num_runtime_fmt::Numeric;
     use structopt::StructOpt;
 
     ///
@@ -67,12 +68,13 @@ mod impl_main {
 
     fn eval_and_print<N>(ctx: &mut Context<N>, expr: &str) -> Result<()>
     where
-        N: std::fmt::Debug + Default + Calcable,
+        N: std::fmt::Debug + Default + Calcable + Numeric,
         <N as Calcable>::Err: 'static + std::error::Error + Send + Sync,
     {
-        match ctx.evaluate(expr) {
+        match ctx.evaluate_annotated(expr) {
             Ok(n) => println!("{}", n),
             Err(Error::Eval(err)) => bail!(err),
+            Err(Error::Format(err)) => bail!(err),
             Err(Error::Parse(err)) => {
                 use lalrpop_util::ParseError::{
                     ExtraToken, InvalidToken, UnrecognizedEOF, UnrecognizedToken, User,
@@ -130,7 +132,7 @@ mod impl_main {
 
     fn shell<N>() -> Result<()>
     where
-        N: std::fmt::Debug + Default + Calcable,
+        N: std::fmt::Debug + Default + Calcable + Numeric,
         <N as Calcable>::Err: 'static + std::error::Error + Send + Sync,
     {
         let mut ctx = Context::<N>::default();

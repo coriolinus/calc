@@ -16,8 +16,12 @@
 pub mod ast;
 pub mod types;
 
-use ast::parser::ExprParser;
+use ast::{
+    parser::{AnnotatedExprParser, ExprParser},
+    AnnotatedError, ParseError as UserParseError,
+};
 use lalrpop_util::ParseError;
+use num_runtime_fmt::Numeric;
 use types::Calcable;
 
 /// Calculation context.
@@ -36,9 +40,24 @@ where
     <N as Calcable>::Err: 'static,
 {
     #[error("Parsing")]
-    Parse(#[from] ParseError<usize, &'static str, &'static str>),
+    Parse(#[from] ParseError<usize, &'static str, UserParseError>),
     #[error("Evaluating")]
     Eval(#[source] <N as Calcable>::Err),
+    #[error("Formatting")]
+    Format(#[source] num_runtime_fmt::Error),
+}
+
+impl<N> From<AnnotatedError<N>> for Error<N>
+where
+    N: std::fmt::Debug + Calcable,
+    <N as Calcable>::Err: 'static,
+{
+    fn from(err: AnnotatedError<N>) -> Self {
+        match err {
+            AnnotatedError::Calculation(err) => Self::Eval(err),
+            AnnotatedError::Format(err) => Self::Format(err),
+        }
+    }
 }
 
 impl<N> Context<N>
@@ -55,5 +74,26 @@ where
         let result = expr.evaluate(&self).map_err(Error::Eval)?;
         self.history.push(result.clone());
         Ok(result)
+    }
+}
+
+impl<N> Context<N>
+where
+    N: std::fmt::Debug + Calcable + Numeric,
+    <N as Calcable>::Err: 'static,
+{
+    /// Evaluate an annotated expression in this context.
+    ///
+    /// Annotations can include output formatting directives. Therefore, the return value
+    /// is a formatted `String`.
+    ///
+    /// This also stores a copy in the context's history.
+    pub fn evaluate_annotated(&mut self, expr: &str) -> Result<String, Error<N>> {
+        let parser = AnnotatedExprParser::new();
+        let expr = parser.parse(expr).map_err(|err| err.map_token(|_| ""))?;
+        let result = expr.expr.evaluate(&self).map_err(Error::Eval)?;
+        self.history.push(result);
+        let formatted = expr.evaluate(&self)?;
+        Ok(formatted)
     }
 }

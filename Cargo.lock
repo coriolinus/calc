@@ -108,12 +108,13 @@ checksum = "ae44d1a3d5a19df61dd0c8beb138458ac2a53a7ac09eba97d55592540004306b"
 
 [[package]]
 name = "calc"
-version = "0.2.1"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "lalrpop",
  "lalrpop-util",
  "lazy_static",
+ "num-runtime-fmt",
  "regex",
  "rustyline",
  "structopt",
@@ -296,10 +297,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "iterext"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e76a40b972b250590567018fd753f44adedc270994fb7be37e4d8c20764bab49"
+dependencies = [
+ "itertools 0.10.0",
+]
+
+[[package]]
 name = "itertools"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "284f18f85651fe11e8a991b2adb42cb078325c996ed026d994719efcfca1d54b"
+dependencies = [
+ "either",
+]
+
+[[package]]
+name = "itertools"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "37d572918e350e82412fe766d24b15e6682fb2ed2bbe018280caa810397cb319"
 dependencies = [
  "either",
 ]
@@ -315,7 +334,7 @@ dependencies = [
  "bit-set",
  "diff",
  "ena",
- "itertools",
+ "itertools 0.9.0",
  "lalrpop-util",
  "petgraph",
  "pico-args",
@@ -379,6 +398,18 @@ dependencies = [
  "cc",
  "cfg-if",
  "libc",
+]
+
+[[package]]
+name = "num-runtime-fmt"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "68a3aa892c8728aa98afcb19dcfab4bab012ad88c2fade0717564db3f521344e"
+dependencies = [
+ "iterext",
+ "lazy_static",
+ "regex",
+ "thiserror",
 ]
 
 [[package]]
