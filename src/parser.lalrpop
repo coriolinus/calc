@@ -13,6 +13,10 @@ use lalrpop_util::ParseError;
 
 grammar;
 
+extern {
+    type Error = UserParseError;
+}
+
 match {
     // numeric terminals get top priority
     r"[_0-9]+(\.[_0-9]+)?",

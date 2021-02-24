@@ -16,7 +16,7 @@
 pub mod ast;
 pub mod types;
 
-use ast::{parser::ExprParser, Expr, ParseError as UserParseError};
+use ast::{parser::ExprParser, ParseError as UserParseError};
 use lalrpop_util::ParseError;
 use types::Calcable;
 
@@ -51,9 +51,7 @@ where
     /// This both returns the calculated value and stores a copy in the context's history.
     pub fn evaluate(&mut self, expr: &str) -> Result<N, Error<N>> {
         let parser = ExprParser::new();
-        let parsed: Result<Expr<'_>, ParseError<usize, &'static str, UserParseError>> =
-            parser.parse(expr).map_err(|err| err.map_token(|_| ""));
-        let expr = parsed?;
+        let expr = parser.parse(expr).map_err(|err| err.map_token(|_| ""))?;
         let result = expr.evaluate(&self).map_err(Error::Eval)?;
         self.history.push(result.clone());
         Ok(result)
