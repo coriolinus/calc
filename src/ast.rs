@@ -1,4 +1,5 @@
 use lalrpop_util::lalrpop_mod;
+use num_runtime_fmt::NumFmt;
 
 use crate::{
     types::{Calcable, CalcableError},
@@ -7,6 +8,15 @@ use crate::{
 
 // no point getting style warnings for generated code
 lalrpop_mod!(#[allow(clippy::all)] pub parser);
+
+/// Error encountered while parsing an expression
+#[derive(Debug, thiserror::Error)]
+pub enum ParseError {
+    #[error("index must fit into usize")]
+    Index(#[source] std::num::ParseIntError),
+    #[error("failed to parse format string")]
+    Format(#[from] num_runtime_fmt::parse::Error),
+}
 
 /// A prefix operator.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -213,5 +223,41 @@ impl<'input> Expr<'input> {
             Self::Func(func, expr) => func.evaluate(expr.evaluate(ctx)?),
             Self::Group(expr) => expr.evaluate(ctx),
         }
+    }
+}
+
+/// Error produced by [`AnnotatedExpr`].
+#[derive(Debug, thiserror::Error)]
+pub enum AnnotatedError<N>
+where
+    N: std::fmt::Debug + Calcable,
+    <N as Calcable>::Err: 'static,
+{
+    #[error(transparent)]
+    Calculation(<N as Calcable>::Err),
+    #[error("failed to render calculation result in desired format")]
+    Format(#[from] num_runtime_fmt::Error),
+}
+
+/// An expression annotated with some metadata.
+pub struct AnnotatedExpr<'input> {
+    pub expr: Expr<'input>,
+    pub format: NumFmt,
+}
+
+impl<'input> AnnotatedExpr<'input> {
+    /// Evaluate this expression into its mathematical result.
+    ///
+    /// Format according to the requested format string.
+    pub fn evaluate<N>(&self, ctx: &Context<N>) -> Result<String, AnnotatedError<N>>
+    where
+        N: std::fmt::Debug + Calcable,
+        <N as Calcable>::Err: 'static,
+    {
+        let value = self
+            .expr
+            .evaluate(ctx)
+            .map_err(AnnotatedError::Calculation)?;
+        self.format.fmt(value).map_err(Into::into)
     }
 }

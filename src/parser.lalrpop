@@ -1,13 +1,14 @@
 use crate::ast::{
+    AnnotatedExpr,
     Constant,
     Expr,
     Function,
     HistoryIndexKind,
     InfixOperator,
+    ParseError as UserParseError,
     PrefixOperator,
     Term,
 };
-
 use lalrpop_util::ParseError;
 
 grammar;
@@ -68,11 +69,11 @@ Term: Term<'input> = {
     <Constant> => Term::Constant(<>),
     <h:r"@\[([0-9]+)\]"> =>? Ok(Term::History(
         HistoryIndexKind::Absolute,
-        h[2..h.len()-1].parse().map_err(|_| ParseError::User { error: "index must fit into usize" })?
+        h[2..h.len()-1].parse().map_err(|err| ParseError::User { error: UserParseError::Index(err) })?
     )),
     <h:r"@\{([0-9]+)\}"> =>? Ok(Term::History(
         HistoryIndexKind::Relative,
-        h[2..h.len()-1].parse().map_err(|_| ParseError::User { error: "index must fit into usize" })?
+        h[2..h.len()-1].parse().map_err(|err| ParseError::User { error: UserParseError::Index(err) })?
     )),
     <h:r"@+"> => Term::History(HistoryIndexKind::Relative, <>.len()),
 };
@@ -135,4 +136,12 @@ ExprTerm: Expr<'input> = {
     "(" <Expr> ")" => Expr::Group(Box::new(<>)),
     "⌈" <Expr> "⌉" => Expr::Func(Function::Ceil, Box::new(<>)),
     "⌊" <Expr> "⌋" => Expr::Func(Function::Floor, Box::new(<>)),
+};
+
+pub AnnotatedExpr: AnnotatedExpr<'input> = {
+    <expr:Expr> <fmt:r":.*"> =>? Ok(AnnotatedExpr {
+        expr,
+        format: fmt[1..].parse().map_err(|err| ParseError::User { error: UserParseError::Format(err) })?,
+    }),
+    <expr:Expr> => AnnotatedExpr { expr, format: Default::default() },
 };

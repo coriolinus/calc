@@ -71,6 +71,7 @@ pub trait CalcableError {
 pub trait Calcable:
     Clone
     + std::fmt::Display
+    + num_runtime_fmt::Numeric
     + Add<Output = Self>
     + Sub<Output = Self>
     + Mul<Output = Self>

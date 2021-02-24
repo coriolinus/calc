@@ -81,6 +81,13 @@ Numbers may contain `_` characters at any point. Those symbols are ignored; they
 
 It is legal to intermix inputs of varying bases.
 
+### Numeric Output Format
+
+The output format of an expression can be specified by adding a `:` symbol followed by a format
+specifier to the expression.
+
+The format specifier can be anything recognized by the [`num-runtime-fmt` crate](https://docs.rs/num-runtime-fmt/0.1.1/num_runtime_fmt/#format-string-grammar).
+
 ### Order of Operations
 
 The following order of operations is used to resolve expressions:
