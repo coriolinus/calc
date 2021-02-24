@@ -88,6 +88,27 @@ specifier to the expression.
 
 The format specifier can be anything recognized by the [`num-runtime-fmt` crate](https://docs.rs/num-runtime-fmt/0.1.1/num_runtime_fmt/#format-string-grammar).
 
+```sh
+$ calc -u "0o644 | 0o111 :#o"
+0o755
+$ calc -u '0o755 & !0o111 :04o'
+0644
+```
+
+```
+[0]: 0xab :b 4
+1010 1011
+[1]: @[0] >>> 4 :x_4
+b000_0000_0000_000a
+[2]: @ & 0xF :4b
+1010
+```
+
+```
+$ calc pi / 3 :v#04.4
+0d01.0471
+```
+
 ### Order of Operations
 
 The following order of operations is used to resolve expressions:
