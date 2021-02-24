@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.3.0] - IN PROGRESS
+## [0.3.0] - 2021-02-24
 
 Enable output formatting.
 
