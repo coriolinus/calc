@@ -251,7 +251,7 @@ impl<'input> AnnotatedExpr<'input> {
     /// Format according to the requested format string.
     pub fn evaluate<N>(&self, ctx: &Context<N>) -> Result<String, AnnotatedError<N>>
     where
-        N: std::fmt::Debug + Calcable,
+        N: std::fmt::Debug + Calcable + num_runtime_fmt::Numeric,
         <N as Calcable>::Err: 'static,
     {
         let value = self
