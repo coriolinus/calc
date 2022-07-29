@@ -13,14 +13,13 @@ categories = [
 ]
 keywords = ["calculator", "cli"]
 
-
 [dependencies]
 anyhow = { version = "1.0.38", optional = true }
 lalrpop-util = "0.19.4"
 lazy_static = "1.4.0"
 num-runtime-fmt = "0.1"
 regex = "1.5.5"
-rustyline = { version = "7.1.0", optional = true }
+rustyline = { version = "10.0.0", optional = true }
 structopt = { version = "0.3.21", optional = true }
 thiserror = "1.0.23"
 
@@ -34,3 +33,7 @@ cli = [
     "rustyline",
     "structopt",
 ]
+
+[[bin]]
+name = "calc"
+required-features = ["cli"]
