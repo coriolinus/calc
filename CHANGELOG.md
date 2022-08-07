@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.4.0] - 2022-08-07
+
+Fix #14: operations with the `@` operator were being applied twice.
+
 ## [0.3.0] - 2021-02-24
 
 Enable output formatting.
