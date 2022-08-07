@@ -248,8 +248,9 @@ pub struct AnnotatedExpr<'input> {
 impl<'input> AnnotatedExpr<'input> {
     /// Evaluate this expression into its mathematical result.
     ///
-    /// Format according to the requested format string.
-    pub fn evaluate<N>(&self, ctx: &Context<N>) -> Result<String, AnnotatedError<N>>
+    /// Return the result as a bare type and also formatted according to the
+    /// requested format string.
+    pub fn evaluate<N>(&self, ctx: &Context<N>) -> Result<(N, String), AnnotatedError<N>>
     where
         N: std::fmt::Debug + Calcable + num_runtime_fmt::Numeric,
         <N as Calcable>::Err: 'static,
@@ -258,6 +259,7 @@ impl<'input> AnnotatedExpr<'input> {
             .expr
             .evaluate(ctx)
             .map_err(AnnotatedError::Calculation)?;
-        self.format.fmt(value).map_err(Into::into)
+        let formatted = self.format.fmt(value.clone())?;
+        Ok((value, formatted))
     }
 }
