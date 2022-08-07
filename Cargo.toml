@@ -2,7 +2,7 @@
 name = "calc"
 version = "0.3.0"
 authors = ["Peter Goodspeed-Niklaus <peter.r.goodspeedniklaus@gmail.com>"]
-edition = "2018"
+edition = "2021"
 description = "CLI calculator app"
 license = "GPL-3.0-only"
 repository = "https://github.com/coriolinus/calc"
@@ -15,7 +15,7 @@ keywords = ["calculator", "cli"]
 
 [dependencies]
 anyhow = { version = "1.0.38", optional = true }
-lalrpop-util = "0.19.4"
+lalrpop-util = { version = "0.19.4", features = ["lexer"] }
 lazy_static = "1.4.0"
 num-runtime-fmt = "0.1"
 regex = "1.5.5"
