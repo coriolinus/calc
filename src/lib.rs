@@ -71,7 +71,7 @@ where
     pub fn evaluate(&mut self, expr: &str) -> Result<N, Error<N>> {
         let parser = ExprParser::new();
         let expr = parser.parse(expr).map_err(|err| err.map_token(|_| ""))?;
-        let result = expr.evaluate(&self).map_err(Error::Eval)?;
+        let result = expr.evaluate(self).map_err(Error::Eval)?;
         self.history.push(result.clone());
         Ok(result)
     }
@@ -91,9 +91,9 @@ where
     pub fn evaluate_annotated(&mut self, expr: &str) -> Result<String, Error<N>> {
         let parser = AnnotatedExprParser::new();
         let expr = parser.parse(expr).map_err(|err| err.map_token(|_| ""))?;
-        let result = expr.expr.evaluate(&self).map_err(Error::Eval)?;
+        let result = expr.expr.evaluate(self).map_err(Error::Eval)?;
         self.history.push(result);
-        let formatted = expr.evaluate(&self)?;
+        let formatted = expr.evaluate(self)?;
         Ok(formatted)
     }
 }
