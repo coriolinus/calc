@@ -15,7 +15,7 @@ keywords = ["calculator", "cli"]
 
 [dependencies]
 anyhow = { version = "1.0.65", optional = true }
-clap = { version = "4.0.14", features = ["derive"] }
+clap = { version = "4.0.14", features = ["derive"], optional = true }
 lalrpop-util = { version = "0.19.8", features = ["lexer"] }
 lazy_static = "1.4.0"
 num-runtime-fmt = "0.1.2"
@@ -30,6 +30,7 @@ lalrpop = "0.19.8"
 default = ["cli"]
 cli = [
     "anyhow",
+    "clap",
     "rustyline",
 ]
 
