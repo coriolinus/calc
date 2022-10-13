@@ -1,6 +1,6 @@
 [package]
 name = "calc"
-version = "0.4.0"
+version = "0.4.1"
 authors = ["Peter Goodspeed-Niklaus <peter.r.goodspeedniklaus@gmail.com>"]
 edition = "2021"
 description = "CLI calculator app"
