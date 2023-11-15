@@ -63,13 +63,13 @@ where
         Err(Error::Format(err)) => bail!(err),
         Err(Error::Parse(err)) => {
             use lalrpop_util::ParseError::{
-                ExtraToken, InvalidToken, UnrecognizedEOF, UnrecognizedToken, User,
+                ExtraToken, InvalidToken, UnrecognizedEof, UnrecognizedToken, User,
             };
             match err {
                 InvalidToken { location } => {
                     bail!("invalid token\n{}\n{:>pos$}", expr, '^', pos = location + 1)
                 }
-                UnrecognizedEOF { location, .. } => {
+                UnrecognizedEof { location, .. } => {
                     bail!(
                         "unexpected EOF\n{}\n{:>pos$}",
                         expr,
@@ -122,14 +122,14 @@ where
     <N as Calcable>::Err: 'static + std::error::Error + Send + Sync,
 {
     let mut ctx = Context::<N>::default();
-    let mut rl = rustyline::Editor::<()>::new()?;
+    let mut rl = rustyline::Editor::<(), _>::new()?;
 
     loop {
         let expr = rl.readline(&format!("[{}]: ", ctx.history.len()))?;
         if let Err(err) = eval_and_print(&mut ctx, &expr) {
             println!("{}", err);
         } else {
-            rl.add_history_entry(expr);
+            let _ = rl.add_history_entry(expr);
         }
     }
 }
