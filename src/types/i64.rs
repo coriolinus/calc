@@ -28,6 +28,9 @@ impl Calcable for i64 {
     }
 
     fn parse_decimal(s: &str) -> Result {
+        // While we could just use `parse` here instead of `from_str_radix`, this
+        // usage preserves the pattern.
+        #[allow(clippy::from_str_radix_10)]
         i64::from_str_radix(&clean_input(s, "0d"), 10).map_err(Error::Parse)
     }
 

@@ -1,10 +1,10 @@
 use anyhow::{bail, Result};
 use calc::{types::Calcable, Context, Error};
+use clap::Parser;
 use num_runtime_fmt::Numeric;
-use structopt::StructOpt;
 
-#[derive(Debug, StructOpt)]
-#[structopt(about, setting = structopt::clap::AppSettings::TrailingVarArg)]
+#[derive(Debug, Parser)]
+#[structopt(about)]
 struct Opt {
     /// Use 64-bit floating-point values for calculation
     #[structopt(short, long)]
@@ -135,7 +135,7 @@ where
 }
 
 fn main() -> Result<()> {
-    let opt = Opt::from_args();
+    let opt = Opt::parse();
     if opt.expression.is_empty() {
         shell_as(opt.get_type()?)
     } else {
