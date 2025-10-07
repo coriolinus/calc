@@ -1,6 +1,7 @@
 mod arithmetic;
 mod bitwise;
 mod comparison;
+mod conversion;
 mod error;
 mod format;
 mod numeric;
