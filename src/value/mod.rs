@@ -3,6 +3,7 @@ mod bitwise;
 mod error;
 mod format;
 mod numeric;
+mod ordering;
 mod parsing;
 
 use std::{cmp::Ordering, f64};
@@ -154,8 +155,6 @@ pub(crate) use dispatch_operation;
     Copy,
     PartialEq,
     Eq,
-    PartialOrd,
-    Ord,
     strum::EnumDiscriminants,
     derive_more::From,
     derive_more::TryInto,
@@ -187,10 +186,25 @@ impl Value {
     pub const PI: Self = Self::Float(N64::unchecked_new(f64::consts::PI));
     pub const E: Self = Self::Float(N64::unchecked_new(f64::consts::E));
 
+    /// Get the order of this value
     pub(crate) fn order(&self) -> Order {
         Order::from(*self)
     }
 
+    /// Promote this value according to its value.
+    ///
+    /// - `u64` values are unconditionally promoted to `u128` as that conversion is infallible
+    /// - `u128` values are promoted to the next order in sequence which can represent the type,
+    ///   according to whether or not it fits inside the type bounds.
+    ///
+    ///   I.e. the value `u64::MAX` would be promoted to `i128`, skipping `i64`, as it could
+    ///   not be losslessly converted.
+    ///   The value `i128::MAX + 1` would be promoted to `f64`, _even though this will lose
+    ///   precision_, because `f64` can better approximate that overflow than `i128` could.
+    /// - `i64` values are unconditionally promoted to `i128` as that conversion is infallible.
+    /// - `i128` values are unconditionally promoted to `f64` as that type can better approximate
+    ///   very large values.
+    /// - `f64` values remain `f64`.
     pub(crate) fn promote(&mut self) {
         *self = match *self {
             Value::UnsignedInt(n) => Self::UnsignedBigInt(n as _),
@@ -221,6 +235,14 @@ impl Value {
         }
     }
 
+    /// Promote this value until it is signed, according to its value.
+    pub(crate) fn promote_to_signed(&mut self) {
+        while self.order() <= Order::UnsignedBigInt {
+            self.promote();
+        }
+    }
+
+    /// Find the minimum compatible order for `self` and `other` by promoting the lesser until they match.
     pub(crate) fn match_orders(&mut self, other: &mut Self) {
         while self.order() != other.order() {
             match self.order().cmp(&other.order()) {
