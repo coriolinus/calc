@@ -16,7 +16,7 @@ keywords = ["calculator", "cli"]
 [dependencies]
 anyhow = { version = "1.0.94", optional = true }
 clap = { version = "4.5.23", features = ["derive"], optional = true }
-derive_more = { version = "2.0.1", features = ["from", "try_into"] }
+derive_more = { version = "2.0.1", features = ["display", "from", "try_into"] }
 lalrpop-util = { version = "0.20.2", features = ["lexer"] }
 lazy_static = "1.5.0"
 noisy_float = "0.2.0"

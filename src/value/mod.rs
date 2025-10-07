@@ -159,6 +159,13 @@ pub(crate) use dispatch_operation;
     strum::EnumDiscriminants,
     derive_more::From,
     derive_more::TryInto,
+    derive_more::Display,
+    derive_more::Binary,
+    derive_more::Octal,
+    derive_more::LowerHex,
+    derive_more::UpperHex,
+    derive_more::LowerExp,
+    derive_more::UpperExp,
 )]
 #[strum_discriminants(derive(PartialOrd, Ord))]
 #[strum_discriminants(name(Order))]
@@ -167,6 +174,10 @@ pub enum Value {
     UnsignedBigInt(u128),
     SignedInt(i64),
     SignedBigInt(i128),
+    #[binary("{_0}")]
+    #[octal("{_0}")]
+    #[lower_hex("{_0}")]
+    #[upper_hex("{_0}")]
     Float(N64),
 }
 
