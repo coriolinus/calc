@@ -1,9 +1,9 @@
 mod arithmetic;
 mod bitwise;
+mod comparison;
 mod error;
 mod format;
 mod numeric;
-mod ordering;
 mod parsing;
 
 use std::{cmp::Ordering, f64};
@@ -149,12 +149,19 @@ pub(crate) use dispatch_operation;
 /// - the lower-order of the pair is promoted
 /// - if the two orders are still not equal, the previous step is repeated
 /// - once the two orders are equal, math is performed as normal.
+///
+/// ## Equality and Comparison
+///
+/// Equality and comparison operations are defined on the logical values.
+/// This is to say that when testing equality or comparing values, they are promoted until they match,
+/// and then the appropriate calculation is performed.
+///
+/// For strict equality comparisons, use the [`strict_eq`][Value::strict_eq] method. For strict ordering,
+/// use the [`strict_cmp`][Value::strict_cmp] method.
 #[derive(
     Debug,
     Clone,
     Copy,
-    PartialEq,
-    Eq,
     strum::EnumDiscriminants,
     derive_more::From,
     derive_more::TryInto,
