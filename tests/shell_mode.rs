@@ -1,4 +1,4 @@
-use calc::{types::Calcable, Context};
+use calc::Context;
 use lazy_static::lazy_static;
 use regex::Regex;
 
@@ -39,15 +39,10 @@ fn parse_expressions(input: &str) -> Vec<ShellCase> {
     out
 }
 
-fn assert_expressions<N>(expressions: &[ShellCase])
-where
-    N: std::fmt::Debug + Calcable,
-    <N as Calcable>::Err: 'static,
-    Context<N>: Default,
-{
-    let mut context = Context::<N>::default();
+fn assert_expressions(expressions: &[ShellCase]) {
+    let mut context = Context::default();
     for ShellCase { input, expect } in expressions {
-        let result = context.evaluate(&input).unwrap();
+        let result = context.evaluate(input).unwrap();
         assert_eq!(&result.to_string(), expect);
     }
 }
@@ -70,7 +65,7 @@ fn readme_2_shell_mode() {
     "#;
 
     let expressions = parse_expressions(CASE);
-    assert_expressions::<f64>(&expressions);
+    assert_expressions(&expressions);
 }
 
 #[test]
@@ -79,11 +74,13 @@ fn issue_14_example_1() {
     [1]: 528500/100
     5285
     [2]: @/2
+    2642.5
+    [3]: @@//2
     2642
     "#;
 
     let expressions = parse_expressions(CASE);
-    assert_expressions::<i64>(&expressions);
+    assert_expressions(&expressions);
 }
 
 #[test]
@@ -100,5 +97,5 @@ fn issue_14_example_2() {
     "#;
 
     let expressions = parse_expressions(CASE);
-    assert_expressions::<u64>(&expressions);
+    assert_expressions(&expressions);
 }
