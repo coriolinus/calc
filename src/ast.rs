@@ -1,10 +1,7 @@
 use lalrpop_util::lalrpop_mod;
 use num_runtime_fmt::NumFmt;
 
-use crate::{
-    types::{Calcable, CalcableError},
-    Context,
-};
+use crate::{Context, Result, Value, ValueError};
 
 // no point getting style warnings for generated code
 lalrpop_mod!(#[allow(clippy::all)] pub parser);
@@ -26,10 +23,10 @@ pub enum PrefixOperator {
 }
 
 impl PrefixOperator {
-    fn evaluate<N: Calcable>(&self, operand: N) -> Result<N, <N as Calcable>::Err> {
+    fn evaluate(&self, operand: Value) -> Result {
         match self {
-            Self::Negation => operand.neg().ok_or_else(|| N::Err::unimplemented("-")),
-            Self::Not => operand.not().ok_or_else(|| N::Err::unimplemented("!")),
+            Self::Negation => Ok(-operand),
+            Self::Not => !operand,
         }
     }
 }
@@ -54,26 +51,22 @@ pub enum InfixOperator {
 }
 
 impl InfixOperator {
-    fn evaluate<N: Calcable>(&self, left: N, right: N) -> Result<N, <N as Calcable>::Err> {
+    fn evaluate(&self, left: Value, right: Value) -> Result {
         match self {
-            Self::Add => <N as Calcable>::add(left, right),
-            Self::Sub => <N as Calcable>::sub(left, right),
-            Self::Mul => <N as Calcable>::mul(left, right),
-            Self::Div => <N as Calcable>::div(left, right),
-            Self::TruncDiv => left.trunc_div(right),
+            Self::Add => Ok(left + right),
+            Self::Sub => Ok(left - right),
+            Self::Mul => Ok(left * right),
+            Self::Div => Ok(left / right),
+            Self::TruncDiv => Ok(left.trunc_div(right)),
+            Self::Rem => Ok(left % right),
             Self::Pow => left.pow(right),
-            Self::Rem => left.rem(right),
-            Self::Lshift => left.shl(right),
-            Self::Rshift => left.shr(right),
+            Self::Lshift => left << right,
+            Self::Rshift => left >> right,
             Self::RotateL => left.rotate_left(right),
             Self::RotateR => left.rotate_right(right),
-            Self::BitAnd => left
-                .bit_and(right)
-                .ok_or_else(|| N::Err::unimplemented("&")),
-            Self::BitOr => left.bit_or(right).ok_or_else(|| N::Err::unimplemented("|")),
-            Self::BitXor => left
-                .bit_xor(right)
-                .ok_or_else(|| N::Err::unimplemented("^")),
+            Self::BitAnd => left & right,
+            Self::BitOr => left | right,
+            Self::BitXor => left ^ right,
         }
     }
 }
@@ -108,34 +101,33 @@ pub enum Function {
 }
 
 impl Function {
-    fn evaluate<N: Calcable>(&self, operand: N) -> Result<N, <N as Calcable>::Err> {
-        let (result, symbol) = match self {
-            Self::Abs => (operand.abs(), "abs"),
-            Self::Ceil => (operand.ceil(), "ceil"),
-            Self::Floor => (operand.floor(), "floor"),
-            Self::Round => (operand.round(), "round"),
-            Self::Sin => (operand.sin(), "sin"),
-            Self::Cos => (operand.cos(), "cos"),
-            Self::Tan => (operand.tan(), "tan"),
-            Self::Sinh => (operand.sinh(), "sinh"),
-            Self::Cosh => (operand.cosh(), "cosh"),
-            Self::Tanh => (operand.tanh(), "tanh"),
-            Self::Asin => (operand.asin(), "asin"),
-            Self::Acos => (operand.acos(), "acos"),
-            Self::Atan => (operand.atan(), "atan"),
-            Self::Asinh => (operand.asinh(), "asinh"),
-            Self::Acosh => (operand.acosh(), "acosh"),
-            Self::Atanh => (operand.atanh(), "atanh"),
-            Self::Rad => (operand.rad(), "rad"),
-            Self::Deg => (operand.deg(), "deg"),
-            Self::Sqrt => (operand.sqrt(), "sqrt"),
-            Self::Cbrt => (operand.cbrt(), "cbrt"),
-            Self::Log => (operand.log(), "log"),
-            Self::Lg => (operand.lg(), "lg"),
-            Self::Ln => (operand.ln(), "ln"),
-            Self::Exp => (operand.exp(), "exp"),
-        };
-        result.ok_or_else(|| N::Err::unimplemented(symbol))
+    fn evaluate(&self, operand: Value) -> Value {
+        match self {
+            Self::Abs => operand.abs(),
+            Self::Ceil => operand.ceil(),
+            Self::Floor => operand.floor(),
+            Self::Round => operand.round(),
+            Self::Sin => operand.sin(),
+            Self::Cos => operand.cos(),
+            Self::Tan => operand.tan(),
+            Self::Sinh => operand.sinh(),
+            Self::Cosh => operand.cosh(),
+            Self::Tanh => operand.tanh(),
+            Self::Asin => operand.asin(),
+            Self::Acos => operand.acos(),
+            Self::Atan => operand.atan(),
+            Self::Asinh => operand.asinh(),
+            Self::Acosh => operand.acosh(),
+            Self::Atanh => operand.atanh(),
+            Self::Rad => operand.rad(),
+            Self::Deg => operand.deg(),
+            Self::Sqrt => operand.sqrt(),
+            Self::Cbrt => operand.cbrt(),
+            Self::Log => operand.log(),
+            Self::Lg => operand.lg(),
+            Self::Ln => operand.ln(),
+            Self::Exp => operand.exp(),
+        }
     }
 }
 
@@ -168,31 +160,23 @@ pub enum Term<'input> {
 }
 
 impl<'input> Term<'input> {
-    fn evaluate<N: Calcable>(&self, ctx: &Context<N>) -> Result<N, <N as Calcable>::Err> {
+    fn evaluate(&self, ctx: &Context) -> Result {
         match self {
-            Self::Literal(s) => N::parse_decimal(s),
-            Self::HexLiteral(s) => N::parse_hex(s),
-            Self::OctLiteral(s) => N::parse_octal(s),
-            Self::BinLiteral(s) => N::parse_binary(s),
-            Self::Constant(Constant::E) => N::E.ok_or_else(|| N::Err::unimplemented("e")),
-            Self::Constant(Constant::Pi) => N::PI.ok_or_else(|| N::Err::unimplemented("pi")),
+            Self::Literal(s) => Value::parse_decimal(s).map_err(Into::into),
+            Self::HexLiteral(s) => Value::parse_hex(s).map_err(Into::into),
+            Self::OctLiteral(s) => Value::parse_octal(s).map_err(Into::into),
+            Self::BinLiteral(s) => Value::parse_binary(s).map_err(Into::into),
+            Self::Constant(Constant::E) => Ok(Value::E),
+            Self::Constant(Constant::Pi) => Ok(Value::PI),
             Self::History(kind, idx) => {
+                let err = || ValueError::HistoryOOB(*kind, *idx, ctx.history.len());
                 let real_idx = match kind {
                     HistoryIndexKind::Absolute => *idx,
                     HistoryIndexKind::Relative => {
-                        ctx.history.len().checked_sub(*idx).ok_or_else(|| {
-                            N::Err::history_out_of_bounds(*kind, *idx, ctx.history.len())
-                        })?
+                        ctx.history.len().checked_sub(*idx).ok_or_else(err)?
                     }
                 };
-                match ctx.history.get(real_idx) {
-                    Some(n) => Ok(n.clone()),
-                    None => Err(N::Err::history_out_of_bounds(
-                        *kind,
-                        *idx,
-                        ctx.history.len(),
-                    )),
-                }
+                ctx.history.get(real_idx).cloned().ok_or_else(err)
             }
         }
     }
@@ -210,17 +194,14 @@ pub enum Expr<'input> {
 
 impl<'input> Expr<'input> {
     /// Evaluate this expression into its mathematical result.
-    pub(crate) fn evaluate<N: Calcable>(
-        &self,
-        ctx: &Context<N>,
-    ) -> Result<N, <N as Calcable>::Err> {
+    pub(crate) fn evaluate(&self, ctx: &Context) -> Result {
         match self {
             Self::Term(term) => term.evaluate(ctx),
             Self::Prefix(prefix, expr) => prefix.evaluate(expr.evaluate(ctx)?),
             Self::Infix(left, infix, right) => {
                 infix.evaluate(left.evaluate(ctx)?, right.evaluate(ctx)?)
             }
-            Self::Func(func, expr) => func.evaluate(expr.evaluate(ctx)?),
+            Self::Func(func, expr) => Ok(func.evaluate(expr.evaluate(ctx)?)),
             Self::Group(expr) => expr.evaluate(ctx),
         }
     }
@@ -228,13 +209,9 @@ impl<'input> Expr<'input> {
 
 /// Error produced by [`AnnotatedExpr`].
 #[derive(Debug, thiserror::Error)]
-pub enum AnnotatedError<N>
-where
-    N: std::fmt::Debug + Calcable,
-    <N as Calcable>::Err: 'static,
-{
+pub enum AnnotatedError {
     #[error(transparent)]
-    Calculation(<N as Calcable>::Err),
+    Calculation(ValueError),
     #[error("failed to render calculation result in desired format")]
     Format(#[from] num_runtime_fmt::Error),
 }
@@ -250,16 +227,12 @@ impl<'input> AnnotatedExpr<'input> {
     ///
     /// Return the result as a bare type and also formatted according to the
     /// requested format string.
-    pub fn evaluate<N>(&self, ctx: &Context<N>) -> Result<(N, String), AnnotatedError<N>>
-    where
-        N: std::fmt::Debug + Calcable + num_runtime_fmt::Numeric,
-        <N as Calcable>::Err: 'static,
-    {
+    pub fn evaluate(&self, ctx: &Context) -> Result<(Value, String), AnnotatedError> {
         let value = self
             .expr
             .evaluate(ctx)
             .map_err(AnnotatedError::Calculation)?;
-        let formatted = self.format.fmt(value.clone())?;
+        let formatted = self.format.fmt(value)?;
         Ok((value, formatted))
     }
 }

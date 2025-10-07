@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.5.0] - UNRELEASED
+
+Feat [#5](https://github.com/coriolinus/calc/issues/5): choose backing value type at evaluation time, not CLI
+
 ## [0.4.0] - 2022-08-07
 
 Fix #14: operations with the `@` operator were being applied twice.
