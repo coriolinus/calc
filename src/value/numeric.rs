@@ -3,7 +3,7 @@ use crate::Value;
 use super::{ArithmeticError, Error, Result};
 
 impl Value {
-    fn as_u32(self) -> Result<u32> {
+    pub(crate) fn as_u32(self) -> Result<u32> {
         match self {
             Value::UnsignedInt(n) => u32::try_from(n).map_err(|_| ArithmeticError::Overflow.into()),
             Value::UnsignedBigInt(n) => {
