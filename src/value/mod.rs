@@ -273,7 +273,7 @@ impl Value {
 
         let narrowest_order = [
             (ZERO..=UI_MAX, Order::UnsignedInt),
-            (ZERO..=UBI_MAX, Order::SignedBigInt),
+            (ZERO..=UBI_MAX, Order::UnsignedBigInt),
             (SI_MIN..=SI_MAX, Order::SignedInt),
             (SBI_MIN..=SBI_MAX, Order::SignedBigInt),
         ]
