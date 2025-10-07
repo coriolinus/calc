@@ -40,3 +40,6 @@ cli = [
 [[bin]]
 name = "calc"
 required-features = ["cli"]
+
+[dev-dependencies]
+rstest = "0.26.1"
