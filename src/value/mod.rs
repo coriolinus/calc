@@ -254,6 +254,50 @@ impl Value {
         f
     }
 
+    /// Demote this value to the narrowest valid container type
+    pub(crate) fn demote(&mut self) {
+        const ZERO: f64 = 0.0;
+        const UI_MAX: f64 = u64::MAX as _;
+        const UBI_MAX: f64 = u128::MAX as _;
+        const SI_MIN: f64 = i64::MIN as _;
+        const SI_MAX: f64 = i64::MAX as _;
+        const SBI_MIN: f64 = i128::MIN as _;
+        const SBI_MAX: f64 = i128::MAX as _;
+
+        let value = *self.clone().promote_to_float();
+        debug_assert!(
+            value.fract().abs() < f64::EPSILON,
+            "we should never demote values not already known to be integral"
+        );
+
+        let narrowest_order = [
+            (ZERO..=UI_MAX, Order::UnsignedInt),
+            (ZERO..=UBI_MAX, Order::SignedBigInt),
+            (SI_MIN..=SI_MAX, Order::SignedInt),
+            (SBI_MIN..=SBI_MAX, Order::SignedBigInt),
+        ]
+        .into_iter()
+        .find_map(|(range, order)| range.contains(&value).then_some(order))
+        .unwrap_or(Order::Float);
+
+        // rhs isn't really necessary, except structurally, for the `dispatch_operation` macro
+        // maybe it would just vanish under optimization?
+        let mut rhs = *self;
+
+        *self = dispatch_operation!(self, rhs, n, |_rhs| {
+            // due to the nature of the macro we're 100% going to perform at least one unnecessary
+            // cast in every expansion branch of this macro; can't be helped
+            #[expect(clippy::unnecessary_cast)]
+            match narrowest_order {
+                Order::UnsignedInt => (*n as u64).into(),
+                Order::UnsignedBigInt => (*n as u128).into(),
+                Order::SignedInt => (*n as i64).into(),
+                Order::SignedBigInt => (*n as i128).into(),
+                Order::Float => (*n as f64).into(),
+            }
+        });
+    }
+
     /// Find the minimum compatible order for `self` and `other` by promoting the lesser until they match.
     pub(crate) fn match_orders(&mut self, other: &mut Self) {
         while self.order() != other.order() {

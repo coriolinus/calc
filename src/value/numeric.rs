@@ -34,6 +34,7 @@ impl Value {
         if let Value::Float(n) = &mut self {
             *n = n.floor();
         }
+        self.demote();
         self
     }
 
@@ -85,7 +86,9 @@ impl Value {
     /// Compute the smallest integer greater than or equal to self.
     pub fn ceil(self) -> Value {
         if let Value::Float(n) = self {
-            n.ceil().into()
+            let mut out = Value::from(n.ceil());
+            out.demote();
+            out
         } else {
             self
         }
@@ -94,7 +97,9 @@ impl Value {
     /// Compute the greatest integer less than or equal to self.
     pub fn floor(self) -> Value {
         if let Value::Float(n) = self {
-            n.floor().into()
+            let mut out = Value::from(n.floor());
+            out.demote();
+            out
         } else {
             self
         }
@@ -103,7 +108,9 @@ impl Value {
     /// Round self to the nearest integer; halfway cases away from 0.0.
     pub fn round(self) -> Value {
         if let Value::Float(n) = self {
-            n.round().into()
+            let mut out = Value::from(n.round());
+            out.demote();
+            out
         } else {
             self
         }
