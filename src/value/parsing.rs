@@ -25,8 +25,7 @@ impl Value {
             .map(Self::UnsignedInt)
             .or_else(|_| u128::from_str_radix(src, radix).map(Self::UnsignedBigInt))
             .or_else(|_| i64::from_str_radix(src, radix).map(Self::SignedInt))
-            .or_else(|_| i128::from_str_radix(src, radix).map(Self::SignedBigInt))
-            .or_else(|_| Err(ParseValueError::Radix(src.to_owned(), radix)))
+            .or_else(|_| i128::from_str_radix(src, radix).map(Self::SignedBigInt)).map_err(|_| ParseValueError::Radix(src.to_owned(), radix))
     }
 
     /// Parse a binary input without decimals.
@@ -67,7 +66,6 @@ impl FromStr for Value {
             .or_else(|_| s.parse::<u128>().map(Self::UnsignedBigInt))
             .or_else(|_| s.parse::<i64>().map(Self::SignedInt))
             .or_else(|_| s.parse::<i128>().map(Self::SignedBigInt))
-            .or_else(|_| s.parse::<f64>().map(N64::new).map(Self::Float))
-            .or_else(|_| Err(ParseValueError::Simple(s.to_owned())))
+            .or_else(|_| s.parse::<f64>().map(N64::new).map(Self::Float)).map_err(|_| ParseValueError::Simple(s.to_owned()))
     }
 }

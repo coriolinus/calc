@@ -58,7 +58,7 @@ impl Context {
         let parser = ExprParser::new();
         let expr = parser.parse(expr).map_err(|err| err.map_token(|_| ""))?;
         let result = expr.evaluate(self).map_err(Error::Eval)?;
-        self.history.push(result.clone());
+        self.history.push(result);
         Ok(result)
     }
 }
