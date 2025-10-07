@@ -30,8 +30,8 @@ fn parse_expressions(input: &str) -> Vec<ExpressionCase> {
 
 fn assert_expressions(expressions: &[ExpressionCase]) {
     for ExpressionCase { input, expect } in expressions {
-        let mut context = Context::<f64>::default();
-        let result = context.evaluate(&input).unwrap();
+        let mut context = Context::default();
+        let result = context.evaluate(input).unwrap();
         assert_eq!(&result.to_string(), expect);
     }
 }

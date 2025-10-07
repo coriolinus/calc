@@ -6,7 +6,16 @@ impl Ord for Value {
     fn cmp(&self, other: &Self) -> Ordering {
         let mut left = *self;
         let mut right = *other;
-        dispatch_operation!(left, right, l, |r| l.cmp(&r))
+        left.match_orders(&mut right);
+
+        match (left, right) {
+            (Value::UnsignedInt(l), Value::UnsignedInt(r)) => l.cmp(&r),
+            (Value::UnsignedBigInt(l), Value::UnsignedBigInt(r)) => l.cmp(&r),
+            (Value::SignedInt(l), Value::SignedInt(r)) => l.cmp(&r),
+            (Value::SignedBigInt(l), Value::SignedBigInt(r)) => l.cmp(&r),
+            (Value::Float(l), Value::Float(r)) => l.total_cmp(&r),
+            _ => unreachable!("both sides have equal orders because we did `match_orders`"),
+        }
     }
 }
 

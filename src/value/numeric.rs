@@ -1,9 +1,6 @@
-use noisy_float::types::N64;
-use num_traits::real::Real as _;
-
 use crate::Value;
 
-use super::{ArithmeticError, Error, Order, Result};
+use super::{ArithmeticError, Error, Result};
 
 impl Value {
     fn as_u32(self) -> Result<u32> {
@@ -24,7 +21,7 @@ impl Value {
                     return Err(Error::ImproperlyFloat);
                 }
                 // a 64-bit integer has at least enough precision to capture the integer part of this number
-                let n = n.raw() as u64;
+                let n = n as u64;
 
                 u32::try_from(n).map_err(|_| ArithmeticError::Overflow.into())
             }
@@ -110,16 +107,6 @@ impl Value {
         } else {
             self
         }
-    }
-
-    fn promote_to_float(&mut self) -> &mut N64 {
-        while self.order() != Order::Float {
-            self.promote();
-        }
-        let Self::Float(ref mut f) = self else {
-            unreachable!("we just promoted up to float")
-        };
-        f
     }
 
     /// Compute the sine of self.

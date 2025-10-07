@@ -15,7 +15,7 @@ impl Numeric for Value {
             Value::UnsignedBigInt(n) => n.binary().map(|iter| Box::new(iter) as _),
             Value::SignedInt(n) => n.binary().map(|iter| Box::new(iter) as _),
             Value::SignedBigInt(n) => n.binary().map(|iter| Box::new(iter) as _),
-            Value::Float(n) => n.raw().binary().map(|iter| Box::new(iter) as _),
+            Value::Float(n) => n.binary().map(|iter| Box::new(iter) as _),
         }
     }
 
@@ -25,7 +25,7 @@ impl Numeric for Value {
             Value::UnsignedBigInt(n) => n.octal().map(|iter| Box::new(iter) as _),
             Value::SignedInt(n) => n.octal().map(|iter| Box::new(iter) as _),
             Value::SignedBigInt(n) => n.octal().map(|iter| Box::new(iter) as _),
-            Value::Float(n) => n.raw().octal().map(|iter| Box::new(iter) as _),
+            Value::Float(n) => n.octal().map(|iter| Box::new(iter) as _),
         }
     }
 
@@ -56,7 +56,7 @@ impl Numeric for Value {
                 (l, r)
             }
             Value::Float(n) => {
-                let (l, r) = n.raw().decimal();
+                let (l, r) = n.decimal();
                 let l = Box::new(l) as _;
                 let r = r.map(|iter| Box::new(iter) as _);
                 (l, r)
@@ -70,7 +70,7 @@ impl Numeric for Value {
             Value::UnsignedBigInt(n) => n.hex().map(|iter| Box::new(iter) as _),
             Value::SignedInt(n) => n.hex().map(|iter| Box::new(iter) as _),
             Value::SignedBigInt(n) => n.hex().map(|iter| Box::new(iter) as _),
-            Value::Float(n) => n.raw().hex().map(|iter| Box::new(iter) as _),
+            Value::Float(n) => n.hex().map(|iter| Box::new(iter) as _),
         }
     }
 
@@ -79,7 +79,7 @@ impl Numeric for Value {
             Value::UnsignedInt(_) | Value::UnsignedBigInt(_) => false,
             Value::SignedInt(n) => n.is_negative(),
             Value::SignedBigInt(n) => n.is_negative(),
-            Value::Float(n) => n.raw().is_sign_negative(),
+            Value::Float(n) => n.is_sign_negative(),
         }
     }
 }

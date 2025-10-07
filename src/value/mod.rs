@@ -8,7 +8,6 @@ mod parsing;
 
 use std::{cmp::Ordering, f64};
 
-use noisy_float::types::N64;
 use num_traits::ToPrimitive as _;
 
 pub use error::{ArithmeticError, Error, ParseValueError};
@@ -57,7 +56,7 @@ macro_rules! dispatch_operation {
                 $op(rhs)
             }
             Value::Float(n) => {
-                let rhs = ::noisy_float::types::N64::try_from($rhs).expect("orders must match");
+                let rhs = f64::try_from($rhs).expect("orders must match");
                 let $n = n;
                 $op(rhs)
             }
@@ -184,14 +183,14 @@ pub enum Value {
     #[octal("{_0}")]
     #[lower_hex("{_0}")]
     #[upper_hex("{_0}")]
-    Float(N64),
+    Float(f64),
 }
 
 pub(crate) type Result<T = Value, E = Error> = std::result::Result<T, E>;
 
 impl Value {
-    pub const PI: Self = Self::Float(N64::unchecked_new(f64::consts::PI));
-    pub const E: Self = Self::Float(N64::unchecked_new(f64::consts::E));
+    pub const PI: Self = Self::Float(f64::consts::PI);
+    pub const E: Self = Self::Float(f64::consts::E);
 
     /// Get the order of this value
     pub(crate) fn order(&self) -> Order {
@@ -223,21 +222,11 @@ impl Value {
                 match n {
                     0..=SI_MAX => Self::SignedInt(n as _),
                     SBI_MIN..=SBI_MAX => Self::SignedBigInt(n as _),
-                    _ => Self::Float(
-                        n.to_f64()
-                            .expect("all u128 convert to f64")
-                            .try_into()
-                            .expect("all f64 from u128 are numbers"),
-                    ),
+                    _ => Self::Float(n.to_f64().expect("all u128 convert to f64")),
                 }
             }
             Value::SignedInt(n) => Self::SignedBigInt(n as _),
-            Value::SignedBigInt(n) => Self::Float(
-                n.to_f64()
-                    .expect("all i128 convert to f64")
-                    .try_into()
-                    .expect("all f64 from i128 are numbers"),
-            ),
+            Value::SignedBigInt(n) => Self::Float(n.to_f64().expect("all i128 convert to f64")),
             Value::Float(n) => Self::Float(n),
         }
     }
@@ -247,6 +236,22 @@ impl Value {
         while self.order() <= Order::UnsignedBigInt {
             self.promote();
         }
+    }
+
+    /// Promote this value until it is a float.
+    pub(crate) fn promote_to_float(&mut self) -> &mut f64 {
+        // there is no case where an integer value produces NaN when converted to a float
+        *self = match *self {
+            Value::UnsignedInt(n) => (n as f64).into(),
+            Value::UnsignedBigInt(n) => (n as f64).into(),
+            Value::SignedInt(n) => (n as f64).into(),
+            Value::SignedBigInt(n) => (n as f64).into(),
+            Value::Float(n) => n.into(),
+        };
+        let Self::Float(ref mut f) = self else {
+            unreachable!("we just promoted up to float")
+        };
+        f
     }
 
     /// Find the minimum compatible order for `self` and `other` by promoting the lesser until they match.

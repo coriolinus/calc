@@ -88,7 +88,9 @@ where
     Rhs: Into<Value>,
 {
     fn div_assign(&mut self, rhs: Rhs) {
+        self.promote_to_float();
         let mut rhs = rhs.into();
+        rhs.promote_to_float();
         dispatch_operation!(self, rhs, n, |rhs| *n /= rhs);
     }
 }
@@ -100,7 +102,9 @@ where
     type Output = Value;
 
     fn div(mut self, rhs: Rhs) -> Self::Output {
+        self.promote_to_float();
         let mut rhs = rhs.into();
+        rhs.promote_to_float();
         dispatch_operation!(&mut self, rhs, n, |rhs| {
             *n /= rhs;
             (*n).into()
