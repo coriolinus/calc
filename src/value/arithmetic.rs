@@ -1,6 +1,6 @@
 use std::ops;
 
-use super::{dispatch_operation, Order};
+use super::dispatch_operation;
 use crate::Value;
 
 impl<Rhs> ops::AddAssign<Rhs> for Value
@@ -33,6 +33,9 @@ where
 {
     fn sub_assign(&mut self, rhs: Rhs) {
         let mut rhs = rhs.into();
+        if rhs > *self {
+            self.promote_to_signed();
+        }
         dispatch_operation!(self, rhs, n, |rhs| *n -= rhs);
     }
 }
@@ -45,6 +48,9 @@ where
 
     fn sub(mut self, rhs: Rhs) -> Self::Output {
         let mut rhs = rhs.into();
+        if rhs > self {
+            self.promote_to_signed();
+        }
         dispatch_operation!(&mut self, rhs, n, |rhs| {
             *n -= rhs;
             (*n).into()
@@ -131,9 +137,7 @@ impl ops::Neg for Value {
     type Output = Value;
 
     fn neg(mut self) -> Self::Output {
-        while self.order() == Order::UnsignedInt || self.order() == Order::UnsignedBigInt {
-            self.promote();
-        }
+        self.promote_to_signed();
         match self {
             Value::UnsignedInt(_) | Value::UnsignedBigInt(_) => {
                 unreachable!("we have already promoted out of unsigned territory")
