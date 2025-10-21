@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.5.0] - UNRELEASED
+## [0.5.0] - 2025-10-21
 
 Feat [#5](https://github.com/coriolinus/calc/issues/5): choose backing value type at evaluation time, not CLI
 Feat [#25](https://github.com/coriolinus/calc/issues/25): add version/build info and `-V`/`--version` flags
