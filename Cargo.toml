@@ -12,6 +12,7 @@ categories = [
     "mathematics",
 ]
 keywords = ["calculator", "cli"]
+build = "build.rs"
 
 [dependencies]
 anyhow = { version = "1.0.94", optional = true }
@@ -28,6 +29,7 @@ thiserror = "1.0.69"
 
 [build-dependencies]
 lalrpop = "0.20.2"
+vergen-gitcl = { version = "1.0.8", features = ["build"] }
 
 [features]
 default = ["cli"]
