@@ -4,24 +4,40 @@ use super::dispatch_operation;
 use crate::Value;
 
 // shim for the missing method on f64
-trait CheckedAdd: Sized + ops::Add<Output = Self> {
+trait CheckedMaths:
+    Sized
+    + ops::Add<Output = Self>
+    + ops::Sub<Output = Self>
+    + ops::Div<Output = Self>
+    + ops::Mul<Output = Self>
+    + ops::Rem<Output = Self>
+{
     fn checked_add(self, rhs: Self) -> Option<Self>;
+    fn checked_sub(self, rhs: Self) -> Option<Self>;
+    fn checked_div(self, rhs: Self) -> Option<Self>;
+    fn checked_mul(self, rhs: Self) -> Option<Self>;
+    fn checked_rem(self, rhs: Self) -> Option<Self>;
 }
 
-impl CheckedAdd for f64 {
+impl CheckedMaths for f64 {
     fn checked_add(self, rhs: Self) -> Option<Self> {
         Some(self + rhs)
     }
-}
 
-// shim for the missing method on f64
-trait CheckedSub: Sized + ops::Sub<Output = Self> {
-    fn checked_sub(self, rhs: Self) -> Option<Self>;
-}
-
-impl CheckedSub for f64 {
     fn checked_sub(self, rhs: Self) -> Option<Self> {
         Some(self - rhs)
+    }
+
+    fn checked_div(self, rhs: Self) -> Option<Self> {
+        Some(self / rhs)
+    }
+
+    fn checked_mul(self, rhs: Self) -> Option<Self> {
+        Some(self * rhs)
+    }
+
+    fn checked_rem(self, rhs: Self) -> Option<Self> {
+        Some(self % rhs)
     }
 }
 
@@ -85,7 +101,11 @@ where
 {
     fn mul_assign(&mut self, rhs: Rhs) {
         let mut rhs = rhs.into();
-        dispatch_operation!(self, rhs, n, |rhs| *n *= rhs);
+        *self = dispatch_operation!(self, rhs, n, |rhs| (*n).checked_mul(rhs).map(Value::from))
+            .unwrap_or_else(|| {
+                self.promote();
+                dispatch_operation!(self, rhs, n, |rhs| Value::from(*n * rhs))
+            });
     }
 }
 
@@ -109,7 +129,11 @@ where
         self.promote_to_float();
         let mut rhs = rhs.into();
         rhs.promote_to_float();
-        dispatch_operation!(self, rhs, n, |rhs| *n /= rhs);
+        *self = dispatch_operation!(self, rhs, n, |rhs| (*n).checked_div(rhs).map(Value::from))
+            .unwrap_or_else(|| {
+                self.promote();
+                dispatch_operation!(self, rhs, n, |rhs| Value::from(*n / rhs))
+            });
     }
 }
 
@@ -131,7 +155,11 @@ where
 {
     fn rem_assign(&mut self, rhs: Rhs) {
         let mut rhs = rhs.into();
-        dispatch_operation!(self, rhs, n, |rhs| *n %= rhs);
+        *self = dispatch_operation!(self, rhs, n, |rhs| (*n).checked_rem(rhs).map(Value::from))
+            .unwrap_or_else(|| {
+                self.promote();
+                dispatch_operation!(self, rhs, n, |rhs| Value::from(*n % rhs))
+            });
     }
 }
 
@@ -419,6 +447,88 @@ mod tests {
         assert_eq!(
             result, expected_value,
             "sub overflow value should be {expected_value:?} : got = {result:?}",
+        );
+    }
+
+    #[rstest]
+    #[case::i64_overflows_to_i128(
+        i64::MAX,
+        i64::MAX,
+        Order::SignedBigInt,
+        85070591730234615847396907784232501249_i128
+    )]
+    #[case::i128_overflows_to_float(i128::MAX, i128::MAX, Order::Float, 2.894802230932905e76)]
+    fn mul_overflow_promotes_to_signed_or_float(
+        #[case] left: impl Into<Value>,
+        #[case] right: impl Into<Value>,
+        #[case] expected_order: Order,
+        #[case] expected_value: impl Into<Value>,
+    ) {
+        let left = left.into();
+        let right = right.into();
+        let result = left * right;
+
+        assert_eq!(
+            result.order(),
+            expected_order,
+            "mul overflow should promote this to {expected_order:?} : got = {result:?}"
+        );
+        let expected_value = expected_value.into();
+        assert_eq!(
+            result, expected_value,
+            "mul overflow value should be {expected_value:?} : got = {result:?}",
+        );
+    }
+
+    #[rstest]
+    #[case::i64_overflows_to_float(i64::MIN, -1_i64, 9.223372036854776e18)]
+    #[case::i128_overflows_to_float(i128::MIN, -1_i128, 1.7014118346046923e38)]
+    fn div_overflow_promotes_to_float(
+        #[case] left: impl Into<Value>,
+        #[case] right: impl Into<Value>,
+        #[case] expected_value: impl Into<Value>,
+    ) {
+        let left = left.into();
+        let right = right.into();
+        let result = left / right;
+
+        // Div always produces a float
+        let expected_order = Order::Float;
+
+        assert_eq!(
+            result.order(),
+            expected_order,
+            "div overflow should promote this to {expected_order:?} : got = {result:?}"
+        );
+        let expected_value = expected_value.into();
+        assert_eq!(
+            result, expected_value,
+            "div overflow value should be {expected_value:?} : got = {result:?}",
+        );
+    }
+
+    #[rstest]
+    #[case::i64_overflows_to_i128(i64::MIN, -1_i64, Order::SignedBigInt, 0_u128)]
+    #[case::i128_overflows_to_float(i128::MIN, -1_i128, Order::Float, -0.0)]
+    fn rem_overflow_promotes_to_signed_or_float(
+        #[case] left: impl Into<Value>,
+        #[case] right: impl Into<Value>,
+        #[case] expected_order: Order,
+        #[case] expected_value: impl Into<Value>,
+    ) {
+        let left = left.into();
+        let right = right.into();
+        let result = left % right;
+
+        assert_eq!(
+            result.order(),
+            expected_order,
+            "rem overflow should promote this to {expected_order:?} : got = {result:?}"
+        );
+        let expected_value = expected_value.into();
+        assert_eq!(
+            result, expected_value,
+            "rem overflow value should be {expected_value:?} : got = {result:?}",
         );
     }
 
